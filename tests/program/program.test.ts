@@ -1,4 +1,6 @@
+import { assertEquals } from "../../test_deps.ts";
 import { Program } from '../../src/program/program.ts';
+import { AsyncLock } from "../../test_deps.ts";
 
 const __dirname = new URL(import.meta.url).pathname;
 
@@ -136,14 +138,38 @@ const subflowDSL = [
 	},
 ];
 
-Deno.test('Program execution', async (t) => {
-	// await t.step('Flat DSL execution', async () => {
-	// 	const program = new Program({ dsl: { symbols: flatDSL } });
-	// 	await program.deploy();
-	// });
+type TestMessage = {
+    test: string
+}
 
-    await t.step('Tree-like DSL execution', async () => {
+Deno.test('Program execution', async (t) => {
+	await t.step('Flat DSL execution', async () => {
+		const program = new Program({ dsl: { symbols: flatDSL } });
+		await program.deploy();
+	});
+
+    await t.step('Recursive tree-like DSL execution', async () => {
         const program = new Program({ dsl: { symbols: subflowDSL }})
+        
+        const lock = new AsyncLock()
+        const messages: TestMessage[] = []
+        const beforeSendHook = (msg: unknown) => {
+            lock.acquire('hehe', (done: (e: null, r: unknown) => void) => {
+                messages.push((msg as TestMessage))
+                done(null, 1)
+            })
+        }
+        program.addHook('beforeSend', beforeSendHook)
+        const terminationPromise = new Promise((resolve) => {
+            program.addHook('onTerminate', () => resolve(1))
+        })
+
         await program.deploy()
+        
+        await terminationPromise
+        assertEquals(messages.length, 4)
+        messages.forEach((msg) => {
+            assertEquals(msg.test, 'Hello, World')
+        })
     })
 });
