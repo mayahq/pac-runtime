@@ -1,13 +1,11 @@
+type GenericObject = Record<string, unknown>;
+type Children = GenericObject[];
+type Properties = GenericObject;
 type Position = {
     x: number
     y: number
     z: number
 }
-
-type GenericObject = Record<string, unknown>;
-type Children = GenericObject[];
-type Properties = GenericObject;
-
 interface Metadata {
     position: Position;
     step_id: string;
@@ -17,6 +15,7 @@ interface Metadata {
 
 class Symbol {
     id: string;
+    name: string;
     type: string;
     properties: Properties;
     children: Children;
@@ -25,6 +24,7 @@ class Symbol {
 
     constructor() {
          this.id = "";
+         this.name = ""
          this.type = "";
          this.properties = {}
          this.children = [];
