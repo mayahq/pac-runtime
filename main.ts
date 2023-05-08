@@ -1,6 +1,6 @@
-import app from "./src/app.ts";
+import app from './src/api/index.ts';
 
 const PORT = 9023
-app.listen(PORT, () => {
-  console.log('server listening on', PORT)
-})
+
+console.log('Server listening on port', PORT)
+app.listen({ port: PORT })
