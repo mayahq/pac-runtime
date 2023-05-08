@@ -136,7 +136,16 @@
     "https://deno.land/x/oak@v12.4.0/testing.ts": "a0be5c84981afde666de29630f34b09d944ca1a2fe6a5185644b60ad95e16d18",
     "https://deno.land/x/oak@v12.4.0/types.d.ts": "1d15e19052254c4d0ff84bb74d84def42588b2fbc59f5f6dc2c3fe5bdbb6b31b",
     "https://deno.land/x/oak@v12.4.0/util.ts": "3af8c4ed04c6cc2bedbe66e562a77fc59c72df31c55a902a63885861ca1639d6",
-    "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556"
+    "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/deps.ts": "f812ca5c560c0d614bb91df0b6a6ef1168150d525b8d0c7af89b1cceda7f4f40",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts": "1e1822c4afe81d8afd6336699eb1715b85a1656eeb4aafefe1946a5a025660b4",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/sender%400.0.1.ts": "ac2c2e6c61eda8022d340f5f47bfb614c85d838ec184f0a00eca1e4500012147",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/deps.ts": "26e3bd291e174652e368fca5ddbd4909792f82e03318727763bcc6ce7971419c",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/index.ts": "e5398620bc10f844a675910acf36151a6774446301189f9c03855f3128b66a2f",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/src/Symbol.ts": "c05ab414506eda312a053b7889bab0709ee5401e5f4014ba57efc70f612f89de",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/utils/exceptions.ts": "a53bf830486d7578d4e70086bc7e5542b1817b680903184209c13f87d25f40b6",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/utils/fieldEval.ts": "e89a2793315e21d94dc236b69520921f2daaff0dd918d468829fbf8a4fa7580c",
+    "https://raw.githubusercontent.com/mayahq/maya-symbol-sdk/main/utils/index.ts": "8c660be03f80f66bb7c813c4dffd82ac4fa82992468a4d117a5e6fa29d2a0ff6"
   },
   "npm": {
     "specifiers": {
@@ -144,7 +153,8 @@
       "@types/express@4": "@types/express@4.17.17",
       "@types/express@^4.17": "@types/express@4.17.17",
       "express@4": "express@4.18.2",
-      "express@^4.17": "express@4.18.2"
+      "express@^4.17": "express@4.18.2",
+      "lodash@4.17.21": "lodash@4.17.21"
     },
     "packages": {
       "@types/body-parser@1.19.2": {
@@ -399,6 +409,10 @@
       },
       "ipaddr.js@1.9.1": {
         "integrity": "sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==",
+        "dependencies": {}
+      },
+      "lodash@4.17.21": {
+        "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==",
         "dependencies": {}
       },
       "media-typer@0.3.0": {
