@@ -7,7 +7,7 @@ type LocalStorageInitArgs = {
     basePath: string;
 }
 
-export class Local implements Storage {
+export class LocalStorage implements Storage {
     basePath: string;
 
     constructor({ basePath }: LocalStorageInitArgs) {

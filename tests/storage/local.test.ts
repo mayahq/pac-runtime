@@ -1,11 +1,11 @@
 import { assertEquals } from "../../test_deps.ts";
-import { Local } from "../../src/storage/local.ts";
+import { LocalStorage } from "../../src/storage/local.ts";
 import { stdpath } from "../../test_deps.ts";
 
 const __dirname = new URL(import.meta.url).pathname
 
 Deno.test('Local storage for programs', async (t) => {
-    const local = new Local({ basePath: stdpath.join(__dirname, '../../../temp') })
+    const local = new LocalStorage({ basePath: stdpath.join(__dirname, '../../../temp') })
     const program = {
         symbols: [{ type: 'http' }]
     }
