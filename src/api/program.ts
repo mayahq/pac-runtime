@@ -20,9 +20,8 @@ function getProgramRouter(runtime: Runtime) {
         ctx.response.body = { message: 'Program successfully stopped '}
     })
     
-    router.get('/', async (ctx) => {
-        const storage = getProgramStorage()
-        const program = await storage.get('abcxyz')
+    router.get('/', (ctx) => {
+        const program = runtime?.program?.dsl
         ctx.response.status = 200
         ctx.response.body = { program: program }
     })
