@@ -1,7 +1,6 @@
 import { getSmallRandomId } from "../utils/misc.ts";
 import { Runtime } from "../runtime/runtime.ts";
-
-type Symbol = any;
+import { Symbol } from "./program.d.ts";
 
 export type ProgramDSL = {
     symbols: Symbol[];
@@ -81,8 +80,7 @@ export class Runnable {
 
     initSymbols() {
         Object.values(this.symbolMap).forEach(symbol => {
-            const isLeafNode = symbol.children.symbols.length === 0
-            if (isLeafNode) {
+            if (!symbol.children || symbol?.children?.symbols?.length === 0) {
                 this.leafSymbolMap[symbol.id].instance.onInit(
                     this.getSendFunction(symbol.id)
                 )
@@ -104,9 +102,8 @@ export class Runnable {
         }
 
         const symbol = this.symbolMap[symbolId]
-        const isLeafNode = symbol.children.symbols.length === 0
 
-        if (isLeafNode) {
+        if (!symbol.children || symbol.children.symbols.length === 0) {
             const sendfn = this.getSendFunction(symbolId)
             const symbolInstance = this.leafSymbolMap[symbolId]
             if (sendfn !== null) {
@@ -129,7 +126,7 @@ export class Runnable {
                 baseProgram: this.baseProgram
             })
 
-            const firstNode = symbol.children.wires.in[0][0]
+            const firstNode = symbol!.children!.wires.in[0][0]
             runnable.runSymbol(firstNode, msg)
         }
     }
@@ -156,8 +153,8 @@ export class Program {
     async getLeafSymbols(symbols: Symbol[], runtime?: Runtime) {
         for (const i in symbols) {
             const symbol = symbols[i]
-            const isLeaf = symbol.children.symbols.length === 0
-            if (isLeaf) {
+
+            if (!symbol.children || symbol?.children?.symbols?.length === 0) {
                 const SymbolClass = await import(symbol.type)
                 const symbolInstance = new SymbolClass.default(runtime)
                 this.leafSymbols[symbol.id] = {
