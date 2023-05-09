@@ -8,7 +8,7 @@ const flatDSL = [
     {
         id: 'qwerty12345',
         name: 'sender',
-        type: 'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/sender%400.0.1.ts',
+        type: 'https://deno.land/x/mayahq@0.0.1/hello-world/sender@0.0.1.ts',
         wires: [['asdfg12345']],
         properties: {},
         children: {
@@ -22,7 +22,7 @@ const flatDSL = [
     {
         id: 'asdfg12345',
         name: 'receiver',
-        type: 'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts',
+        type: 'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
         wires: [[]],
         properties: {},
         children: {
@@ -39,7 +39,7 @@ const subflowDSL = [
     {
         'id': 'qwerty12345',
         'name': 'sender',
-        'type': 'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/sender%400.0.1.ts',
+        'type': 'https://deno.land/x/mayahq@0.0.1/hello-world/sender@0.0.1.ts',
         'wires': [['subflow_1']],
         'properties': {},
         'children': {
@@ -66,7 +66,7 @@ const subflowDSL = [
                     'id': 're1',
                     'name': 'receiver',
                     'type':
-                        'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts',
+                        'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                     'wires': [['subflow_2']],
                     'properties': {},
                     'children': {
@@ -93,7 +93,7 @@ const subflowDSL = [
                                 'id': 're2',
                                 'name': 'receiver',
                                 'type':
-                                    'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts',
+                                    'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                                 'wires': [['re3']],
                                 'properties': {},
                                 'children': {
@@ -108,7 +108,7 @@ const subflowDSL = [
                                 'id': 're3',
                                 'name': 'receiver',
                                 'type':
-                                    'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts',
+                                    'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                                 'wires': [[]],
                                 'properties': {},
                                 'children': {
@@ -128,7 +128,7 @@ const subflowDSL = [
     {
         'id': 're4',
         'name': 'receiver',
-        'type': 'https://raw.githubusercontent.com/mayahq/maya-symbol-primitives/main/hello-world/receiver%400.0.1.ts',
+        'type': 'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
         'wires': [[]],
         'properties': {},
         'children': {
