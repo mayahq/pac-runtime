@@ -1,6 +1,5 @@
 import { Router } from '../../deps.ts'
 import { Runtime } from '../runtime/runtime.ts'
-import { getProgramStorage } from '../storage/index.ts'
 
 function getProgramRouter(runtime: Runtime) {
     const router = new Router()
