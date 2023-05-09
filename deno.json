@@ -1,6 +1,13 @@
 {
-  "tasks": {
-    "dev": "deno run --watch --allow-all main.ts",
-    "test": "deno test tests --allow-all --quiet"
-  }
+    "tasks": {
+        "dev": "deno run --watch --allow-all main.ts",
+        "test": "deno test tests --allow-all --quiet --lock=deno.lock --lock-write",
+        "push_image": "./scripts/push_to_ecr.sh"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "singleQuote": true,
+        "semiColons": false,
+        "lineWidth": 120
+    }
 }

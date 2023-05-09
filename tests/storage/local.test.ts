@@ -1,7 +1,7 @@
-import { assertEquals } from "../../test_deps.ts";
-import { LocalStorage } from "../../src/storage/local.ts";
-import { stdpath } from "../../test_deps.ts";
-import { Symbol } from "../../src/program/program.d.ts";
+import { assertEquals } from '../../test_deps.ts'
+import { LocalStorage } from '../../src/storage/local.ts'
+import { stdpath } from '../../test_deps.ts'
+import { Symbol } from '../../src/program/program.d.ts'
 
 const __dirname = new URL(import.meta.url).pathname
 
@@ -13,15 +13,21 @@ const testSymbol: Symbol = {
 }
 
 Deno.test('Local storage for programs', async (t) => {
-    const local = new LocalStorage({ basePath: stdpath.join(__dirname, '../../../temp') })
+    const local = new LocalStorage({
+        basePath: stdpath.join(__dirname, '../../../temp'),
+    })
     const program = {
-        symbols: [testSymbol]
+        symbols: [testSymbol],
     }
     const workerId = 'abcxyz'
 
     await t.step('set', async () => {
         await local.set(workerId, program)
-        const content = JSON.parse(await Deno.readTextFile(stdpath.join(local.basePath, `${workerId}.json`)))
+        const content = JSON.parse(
+            await Deno.readTextFile(
+                stdpath.join(local.basePath, `${workerId}.json`),
+            ),
+        )
         assertEquals(content.symbols.length, 1)
         assertEquals(content.symbols[0].type, 'http')
     })
