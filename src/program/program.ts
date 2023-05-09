@@ -99,9 +99,7 @@ export class Runnable {
     }
 
     runSymbol(symbolId: string, msg: unknown) {
-        console.log('running', symbolId)
         if (this.baseProgram.stopped) {
-            console.log('oops stopped')
             return
         }
 
@@ -114,6 +112,7 @@ export class Runnable {
             if (sendfn !== null) {
                 symbolInstance.instance.onMessage(sendfn, msg)
             } else {
+                symbolInstance.instance.onMessage((msg) => msg, msg)
                 /**
                  * If sendfn is null, that means we're at a terminal node.
                  * Calling all onTerminate hooks here.
