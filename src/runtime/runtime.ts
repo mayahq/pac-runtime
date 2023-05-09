@@ -3,7 +3,7 @@ import { Program, ProgramDSL } from '../program/program.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import { LocalStorage } from '../storage/local.ts'
-import { stdpath } from '../../test_deps.ts'
+import { stdpath } from '../../deps.ts'
 import createBaseApp from '../api/index.ts'
 
 const __dirname = new URL(import.meta.url).pathname
