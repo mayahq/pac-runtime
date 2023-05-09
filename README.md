@@ -11,4 +11,4 @@ This will start the server.
 
 You can look at the `pac-runtime` Postman collection in the Maya workspace to see what requests can be made.
 ## Run individual programs without starting the server
-You can see an example of how to run individual programs in the `Program` [here](https://github.com/mayahq/pac-runtime/blob/main/tests/program/program.test.ts#L149).
+You can see an example of how to run individual programs in the `Program` tests [here](https://github.com/mayahq/pac-runtime/blob/main/tests/program/program.test.ts#L149).
