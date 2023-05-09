@@ -1,10 +1,16 @@
 import { Application } from "../../deps.ts";
-import programRouter from "./program.ts";
+import { Runtime } from "../runtime/runtime.ts";
+import getProgramRouter from "./program.ts";
 
-const app = new Application()
+function createBaseApp(runtime: Runtime) {
+    const app = new Application()
+    
+    // Program router
+    const programRouter = getProgramRouter(runtime)
+    app.use(programRouter.allowedMethods())
+    app.use(programRouter.routes())
+    
+    return app
+}
 
-// Program router
-app.use(programRouter.allowedMethods())
-app.use(programRouter.routes())
-
-export default app
+export default createBaseApp
