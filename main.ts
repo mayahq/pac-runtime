@@ -1,4 +1,4 @@
-import { Runtime } from './src/runtime/runtime.ts';
+import { Runtime } from './src/runtime/runtime.ts'
 
 const runtime = new Runtime({ id: 'abcxyz' })
 

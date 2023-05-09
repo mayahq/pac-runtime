@@ -1,29 +1,29 @@
 type SymbolMetadata = {
     position: {
-        x: number;
-        y: number;
-        z: number;
-    };
-    prefix?: string;
-    step_id?: string;
-    tmp_id?: string;
+        x: number
+        y: number
+        z: number
+    }
+    prefix?: string
+    step_id?: string
+    tmp_id?: string
 }
 
 export type Symbol = {
-    id: string;
-    name: string;
-    type: string;
+    id: string
+    name: string
+    type: string
     properties?: {
         [key: string]: unknown
-    };
-    wires: string[][];
-    description?: string[];
+    }
+    wires: string[][]
+    description?: string[]
     children?: {
         wires: {
-            in: string[][];
-            out: string[][];
-        },
+            in: string[][]
+            out: string[][]
+        }
         symbols: Symbol[]
-    };
+    }
     metadata?: SymbolMetadata
 }

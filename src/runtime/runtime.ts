@@ -1,41 +1,42 @@
-import { Application, Router } from "../../deps.ts"
-import { Program, ProgramDSL } from "../program/program.ts";
-import { Comms } from "./comms.ts";
-import { Storage } from "../storage/typings.d.ts";
-import { LocalStorage } from "../storage/local.ts";
-import { stdpath } from "../../test_deps.ts";
-import createBaseApp from "../api/index.ts";
+import { Application, Router } from '../../deps.ts'
+import { Program, ProgramDSL } from '../program/program.ts'
+import { Comms } from './comms.ts'
+import { Storage } from '../storage/typings.d.ts'
+import { LocalStorage } from '../storage/local.ts'
+import { stdpath } from '../../test_deps.ts'
+import createBaseApp from '../api/index.ts'
 
 const __dirname = new URL(import.meta.url).pathname
 type RuntimeInitArgs = {
-    id: string;
+    id: string
 }
 
 type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
 type ExecutionStatus = 'RUNNING' | 'DONE'
 
 interface SymbolMethods {
-    reportExecutionStatus: (status: ExecutionStatus) => Promise<void>;
-    sendMessage: (event: string, data: unknown) => Promise<void>;
-    setStatus: (status: SymbolStatus, message: string) => Promise<void>;
+    reportExecutionStatus: (status: ExecutionStatus) => Promise<void>
+    sendMessage: (event: string, data: unknown) => Promise<void>
+    setStatus: (status: SymbolStatus, message: string) => Promise<void>
 }
 
 type DeployArgs = {
-    dsl: ProgramDSL;
-    saveToStorage?: boolean;
+    dsl: ProgramDSL
+    saveToStorage?: boolean
 }
 
 function getSymbolMethods(runtime: Runtime): SymbolMethods {
     const reportExecutionStatus = (status: ExecutionStatus) => {
         return runtime.comms.broadcast({
             event: 'nodeexecstatus',
-            data: { status }
+            data: { status },
         })
     }
 
     const sendMessage = (event: string, data: unknown) => {
         return runtime.comms.broadcast({
-            event, data
+            event,
+            data,
         })
     }
 
@@ -43,26 +44,27 @@ function getSymbolMethods(runtime: Runtime): SymbolMethods {
         return runtime.comms.broadcast({
             event: 'nodestatus',
             data: {
-                status, message
-            }
+                status,
+                message,
+            },
         })
     }
 
     return {
         reportExecutionStatus,
         sendMessage,
-        setStatus
+        setStatus,
     }
 }
 
 export class Runtime {
-    app: Application;
-    id: string;
-    dynamicRouter: Router;
-    comms: Comms;
-    functions: SymbolMethods;
-    storage: Storage;
-    program: Program | null;
+    app: Application
+    id: string
+    dynamicRouter: Router
+    comms: Comms
+    functions: SymbolMethods
+    storage: Storage
+    program: Program | null
 
     constructor({ id }: RuntimeInitArgs) {
         this.app = createBaseApp(this)
@@ -73,7 +75,7 @@ export class Runtime {
         this.comms = new Comms({ app: this.app })
         this.functions = getSymbolMethods(this)
         this.storage = new LocalStorage({
-            basePath: stdpath.join(__dirname, '../../../temp')
+            basePath: stdpath.join(__dirname, '../../../temp'),
         })
         this.program = null
     }

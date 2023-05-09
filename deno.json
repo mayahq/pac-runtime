@@ -1,6 +1,12 @@
 {
-  "tasks": {
-    "dev": "deno run --watch --allow-all main.ts",
-    "test": "deno test tests --allow-all --quiet"
-  }
+    "tasks": {
+        "dev": "deno run --watch --allow-all main.ts",
+        "test": "deno test tests --allow-all --quiet"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "singleQuote": true,
+        "semiColons": false,
+        "lineWidth": 120
+    }
 }
