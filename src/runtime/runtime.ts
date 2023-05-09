@@ -8,7 +8,6 @@ import createBaseApp from "../api/index.ts";
 
 const __dirname = new URL(import.meta.url).pathname
 type RuntimeInitArgs = {
-    app: Application;
     id: string;
 }
 
