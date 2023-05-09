@@ -1,4 +1,5 @@
 import { getSmallRandomId } from "../utils/misc.ts";
+import { Runtime } from "../runtime/runtime.ts";
 
 type Symbol = any;
 
@@ -32,7 +33,8 @@ type LeafSymbolDef = {
 }
 
 type HookType = 'beforeSend' | 'onTerminate'
-type HookMap = Record<HookType, Record<string, Function>>
+type HookFunction = (...args: unknown[]) => Promise<unknown> | unknown
+type HookMap = Record<HookType, Record<string, HookFunction>>
 
 export class Runnable {
     leafSymbolMap: Record<string, LeafSymbolDef>
@@ -97,6 +99,12 @@ export class Runnable {
     }
 
     runSymbol(symbolId: string, msg: unknown) {
+        console.log('running', symbolId)
+        if (this.baseProgram.stopped) {
+            console.log('oops stopped')
+            return
+        }
+
         const symbol = this.symbolMap[symbolId]
         const isLeafNode = symbol.children.symbols.length === 0
 
@@ -132,7 +140,8 @@ export class Program {
     dsl: ProgramDSL
     leafSymbols: Record<string, LeafSymbolDef>
     runnable: Runnable;
-    hooks: HookMap
+    hooks: HookMap;
+    stopped: boolean;
 
     constructor({ dsl }: ProgramInitArgs) {
         this.dsl = dsl
@@ -142,32 +151,37 @@ export class Program {
             beforeSend: {},
             onTerminate: {}
         }
+        this.stopped = false
     }
 
-    async getLeafSymbols(symbols: Symbol[]) {
+    async getLeafSymbols(symbols: Symbol[], runtime?: Runtime) {
         for (const i in symbols) {
             const symbol = symbols[i]
             const isLeaf = symbol.children.symbols.length === 0
             if (isLeaf) {
                 const SymbolClass = await import(symbol.type)
-                const symbolInstance = new SymbolClass.default(null)
+                const symbolInstance = new SymbolClass.default(runtime)
                 this.leafSymbols[symbol.id] = {
                     instance: symbolInstance,
                     dslRepresentation: symbol
                 }
             } else {
-                await this.getLeafSymbols(symbol.children.symbols)
+                await this.getLeafSymbols(symbol.children.symbols, runtime)
             }
         }
     }
 
     runFrom(symbolId: string, msg: unknown) {
+        if (this.stopped) {
+            return
+        }
         return this.runnable.runSymbol(symbolId, msg)
     }
 
-    async deploy() {
-        await this.getLeafSymbols(this.dsl.symbols)
+    async deploy(runtime?: Runtime) {
+        await this.getLeafSymbols(this.dsl.symbols, runtime)
         this.runnable.leafSymbolMap = this.leafSymbols
+        this.stopped = false
 
         /**
          * Initialise all symbols
@@ -175,9 +189,17 @@ export class Program {
         this.runnable.initSymbols()
     }
 
-    addHook(type: HookType, fn: Function) {
+    addHook(type: HookType, fn: HookFunction) {
         const hookId = getSmallRandomId()
         this.hooks[type][hookId] = fn
         return hookId
+    }
+
+    stop() {
+        this.stopped = true
+    }
+
+    start() {
+        this.stopped = false
     }
 }

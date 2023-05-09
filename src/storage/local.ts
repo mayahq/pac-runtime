@@ -1,6 +1,6 @@
 import { stdpath } from "../../deps.ts";
 import { Storage } from "./typings.d.ts";
-import { Program } from "../program.ts";
+import { ProgramDSL } from "../program/program.ts";
 
 
 type LocalStorageInitArgs = {
@@ -15,12 +15,20 @@ export class LocalStorage implements Storage {
     }
 
     async get(workerId: string) {
-        const text = await Deno.readTextFile(stdpath.join(this.basePath, `${workerId}.json`))
-        const program = JSON.parse(text)
-        return program
+        try {
+            const text = await Deno.readTextFile(stdpath.join(this.basePath, `${workerId}.json`))
+            const program = JSON.parse(text)
+            return program
+        } catch (e) {
+            console.log('Error getting program:', e)
+            await this.set(workerId, { symbols: [] })
+            return {
+                symbols: []
+            }
+        }
     }
 
-    async set(workerId: string, prog: Program) {
+    async set(workerId: string, prog: ProgramDSL) {
         await Deno.writeTextFile(stdpath.join(this.basePath, `${workerId}.json`), JSON.stringify(prog))
     }
 }

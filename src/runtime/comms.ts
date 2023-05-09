@@ -58,8 +58,8 @@ export class Comms {
             }
         })
 
-        this.app.use(this.socketRouter.allowedMethods())
-        this.app.use(this.socketRouter.routes())
+        this.app.use((ctx, next) => this.socketRouter.allowedMethods()(ctx, next))
+        this.app.use((ctx, next) => this.socketRouter.routes()(ctx, next))
     }
 
     async _handleSocketMessage(message: MessageEvent<ConnMessage>, connection: WebSocket) {
@@ -109,6 +109,7 @@ export class Comms {
 
 
     init() {
+        this.socketRouter = new Router().prefix('/socket')
         this._registerPrimarySocketListener()
     }
 }
