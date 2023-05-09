@@ -1,3 +1,6 @@
 tests/*
 test_deps.ts
 dusnat*
+scripts/*
+.vscode/*
+.github/*
