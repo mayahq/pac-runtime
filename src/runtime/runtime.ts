@@ -2,8 +2,6 @@ import { Application, Router } from '../../deps.ts'
 import { Program, ProgramDSL } from '../program/program.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
-import { LocalStorage } from '../storage/local.ts'
-import { stdpath } from '../../deps.ts'
 import createBaseApp from '../api/index.ts'
 import { AxiosInstance } from '../../../../Library/Caches/deno/npm/registry.npmjs.org/axios/1.4.0/index.d.ts'
 import { getAxiosInstance } from './axios.ts'
@@ -14,9 +12,9 @@ const __dirname = new URL(import.meta.url).pathname
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 
 type RuntimeInitArgs = {
-    id: string;
-    mayaRuntimeToken: string;
-    ownerId: string;
+    id: string
+    mayaRuntimeToken: string
+    ownerId: string
     environment: string
     autoShutdownBehaviour: AutoShutdownBehaviour
     maxIdleTime: number
@@ -84,7 +82,6 @@ export class Runtime {
     program: Program | null
     axiosInstance: AxiosInstance
 
-
     constructor(props: RuntimeInitArgs) {
         this.id = props.id
         this.mayaRuntimeToken = props.mayaRuntimeToken
@@ -92,7 +89,7 @@ export class Runtime {
         this.environment = props.environment
         this.autoShutdownBehaviour = props.autoShutdownBehaviour
         this.maxIdleTime = props.maxIdleTime
-        
+
         this.app = createBaseApp(this)
         this.dynamicRouter = new Router()
         this.dynamicRouter.prefix('/dynamic')
@@ -104,15 +101,18 @@ export class Runtime {
         this.program = null
         this.axiosInstance = getAxiosInstance(this)
         this.storage = new RemoteStorage({
-            runtime: this
+            runtime: this,
         })
     }
 
     get appBackendBaseUrl() {
         switch (this.environment) {
-            case 'STAGING': return 'https://api.dev.mayalabs.io/app'
-            case 'PRODUCTION': return 'https://api.mayalabs.io/app'
-            default: return 'http://localhost:5000'
+            case 'STAGING':
+                return 'https://api.dev.mayalabs.io/app'
+            case 'PRODUCTION':
+                return 'https://api.mayalabs.io/app'
+            default:
+                return 'http://localhost:5000'
         }
     }
 

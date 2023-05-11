@@ -4,7 +4,7 @@ import { loadEnv } from './deps.ts'
 
 await loadEnv({
     export: true,
-    allowEmptyValues: true
+    allowEmptyValues: true,
 })
 
 const id = getEnvVariableOrCrash('RUNTIME_ID', 'abc123')
@@ -22,7 +22,7 @@ const runtime = new Runtime({
     ownerId,
     environment,
     autoShutdownBehaviour: (autoShutdownBehaviour as AutoShutdownBehaviour),
-    maxIdleTime: parseInt(maxIdleTime)
+    maxIdleTime: parseInt(maxIdleTime),
 })
 
 console.log('Server listening on port', 9023)

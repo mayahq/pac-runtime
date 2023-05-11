@@ -4,8 +4,8 @@ import { Runtime } from './runtime.ts'
 export function getAxiosInstance(runtime: Runtime) {
     const instance = axios.create({
         headers: {
-            'maya-api-key': runtime.mayaRuntimeToken
-        }
+            'maya-api-key': runtime.mayaRuntimeToken,
+        },
     })
     return instance
 }

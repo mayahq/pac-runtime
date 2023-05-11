@@ -1,5 +1,5 @@
-import { Router } from "../../deps.ts";
-import { Runtime } from "../runtime/runtime.ts";
+import { Router } from '../../deps.ts'
+import { Runtime } from '../runtime/runtime.ts'
 
 function getHealthRouter(runtime: Runtime): Router {
     console.log('runtime', runtime)
@@ -10,7 +10,7 @@ function getHealthRouter(runtime: Runtime): Router {
         ctx.response.status = 200
         ctx.response.body = {
             status: 'ok',
-            timestamp: Date.now()
+            timestamp: Date.now(),
         }
     })
 

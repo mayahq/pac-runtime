@@ -65,8 +65,7 @@ const subflowDSL = [
                 {
                     'id': 're1',
                     'name': 'receiver',
-                    'type':
-                        'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
+                    'type': 'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                     'wires': [['subflow_2']],
                     'properties': {},
                     'children': {
@@ -92,8 +91,7 @@ const subflowDSL = [
                             {
                                 'id': 're2',
                                 'name': 'receiver',
-                                'type':
-                                    'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
+                                'type': 'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                                 'wires': [['re3']],
                                 'properties': {},
                                 'children': {
@@ -107,8 +105,7 @@ const subflowDSL = [
                             {
                                 'id': 're3',
                                 'name': 'receiver',
-                                'type':
-                                    'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
+                                'type': 'https://deno.land/x/mayahq@0.0.1/hello-world/receiver@0.0.1.ts',
                                 'wires': [[]],
                                 'properties': {},
                                 'children': {

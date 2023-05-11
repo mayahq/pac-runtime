@@ -1,6 +1,6 @@
-import { ProgramDSL } from "../program/program.ts";
-import { Runtime } from "../runtime/runtime.ts";
-import { Storage } from "./typings.d.ts";
+import { ProgramDSL } from '../program/program.ts'
+import { Runtime } from '../runtime/runtime.ts'
+import { Storage } from './typings.d.ts'
 
 type RemoteStorageInitArgs = {
     runtime: Runtime
@@ -29,8 +29,8 @@ export class RemoteStorage implements Storage {
             url: `${this.baseUrl}/v2/worker/program/${workerId}`,
             method: 'put',
             data: {
-                program: prog
-            }
+                program: prog,
+            },
         })
     }
 }
