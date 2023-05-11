@@ -1,0 +1,36 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "mayanr.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "mayanr.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - "rt-{{ .Values.runtimeId }}.{{ .Values.ingress.domain }}"
+        - "*.{{ .Values.ingress.domain }}"
+      secretName: {{ .Values.username }}-secret
+  rules:
+    - host: "rt-{{ .Values.runtimeId }}.{{ .Values.ingress.domain }}"
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            path: /
+            backend:
+              service:
+                name: "rt-{{ .Values.runtimeId }}"
+                port: 
+                  number: {{ $svcPort }}
+  {{- end }}

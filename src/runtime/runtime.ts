@@ -8,7 +8,10 @@ import createBaseApp from '../api/index.ts'
 
 const __dirname = new URL(import.meta.url).pathname
 type RuntimeInitArgs = {
-    id: string
+    id: string;
+    mayaRuntimeToken: string;
+    ownerId: string;
+    environment: string;
 }
 
 type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
@@ -58,18 +61,24 @@ function getSymbolMethods(runtime: Runtime): SymbolMethods {
 }
 
 export class Runtime {
-    app: Application
     id: string
+    mayaRuntimeToken: string
+    ownerId: string
+    environment: string
+    app: Application
     dynamicRouter: Router
     comms: Comms
     functions: SymbolMethods
     storage: Storage
     program: Program | null
 
-    constructor({ id }: RuntimeInitArgs) {
-        this.app = createBaseApp(this)
+    constructor({ id, mayaRuntimeToken, ownerId, environment }: RuntimeInitArgs) {
         this.id = id
-
+        this.mayaRuntimeToken = mayaRuntimeToken
+        this.ownerId = ownerId
+        this.environment = environment
+        
+        this.app = createBaseApp(this)
         this.dynamicRouter = new Router()
         this.dynamicRouter.prefix('/dynamic')
         this.comms = new Comms({ app: this.app })

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # name: {{ include "mayanr.fullname" . }}
+  name: "rt-{{ .Values.runtimeId }}"
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "mayanr.labels" . | nindent 4 }}
+    mayaResourceType: userRuntime
+    userRuntimeOwner: {{ .Values.userRuntimeOwner }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mayanr.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mayanr.selectorLabels" . | nindent 8 }}
+        mayaResourceType: userRuntime
+        userRuntimeOwner: {{ .Values.userRuntimeOwner }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      containers:
+        - name: "rt-{{ .Values.runtimeId }}"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: []
+          ports:
+            - name: http
+              containerPort: 1880
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 14
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: RUNTIME_ID
+              value: {{ .Values.runtimeId }}
+            - name: RUNTIME_TOKEN
+              value: {{ .Values.keys.runtimeAuthToken }}
+            - name: OWNER_ID
+              value: {{ .Values.profileSlug }}
+            - name: OWNER_USERNAME
+              value: {{ .Values.username }}
+            - name: AUTO_SHUTDOWN_BEHAVIOUR
+              value: {{ .Values.autoShutdown.behaviour }}
+            - name: MAX_IDLE_TIME
+              value: "{{ .Values.autoShutdown.maxIdleTime }}"
+            - name: RUNTIME_ENVIRONMENT
+              value: {{ .Values.runtimeEnvironment }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
