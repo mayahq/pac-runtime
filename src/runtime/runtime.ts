@@ -7,11 +7,16 @@ import { stdpath } from '../../deps.ts'
 import createBaseApp from '../api/index.ts'
 
 const __dirname = new URL(import.meta.url).pathname
+
+export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
+
 type RuntimeInitArgs = {
     id: string;
     mayaRuntimeToken: string;
     ownerId: string;
-    environment: string;
+    environment: string
+    autoShutdownBehaviour: AutoShutdownBehaviour
+    maxIdleTime: number
 }
 
 type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
@@ -71,12 +76,16 @@ export class Runtime {
     functions: SymbolMethods
     storage: Storage
     program: Program | null
+    autoShutdownBehaviour: 'NEVER' | 'BY_LAST_USE'
+    maxIdleTime = 1800000
 
-    constructor({ id, mayaRuntimeToken, ownerId, environment }: RuntimeInitArgs) {
-        this.id = id
-        this.mayaRuntimeToken = mayaRuntimeToken
-        this.ownerId = ownerId
-        this.environment = environment
+    constructor(props: RuntimeInitArgs) {
+        this.id = props.id
+        this.mayaRuntimeToken = props.mayaRuntimeToken
+        this.ownerId = props.ownerId
+        this.environment = props.environment
+        this.autoShutdownBehaviour = props.autoShutdownBehaviour
+        this.maxIdleTime = props.maxIdleTime
         
         this.app = createBaseApp(this)
         this.dynamicRouter = new Router()

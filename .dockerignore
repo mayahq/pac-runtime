@@ -4,3 +4,4 @@ dusnat*
 scripts/*
 .vscode/*
 .github/*
+.env
