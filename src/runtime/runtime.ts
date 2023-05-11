@@ -3,11 +3,9 @@ import { Program, ProgramDSL } from '../program/program.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
-import { AxiosInstance } from '../../../../Library/Caches/deno/npm/registry.npmjs.org/axios/1.4.0/index.d.ts'
+import { AxiosInstance } from '../../deps.ts'
 import { getAxiosInstance } from './axios.ts'
 import { RemoteStorage } from '../storage/remote.ts'
-
-const __dirname = new URL(import.meta.url).pathname
 
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 
