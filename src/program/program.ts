@@ -41,22 +41,25 @@ export class Runnable {
     parentSymbolId?: string | null
     baseProgram: Program
 
-    constructor(
-        { dsl, leafSymbolMap, parent, parentSymbolId, baseProgram }: RunnableInitArgs,
-    ) {
+    constructor({
+        dsl,
+        leafSymbolMap,
+        parent,
+        parentSymbolId,
+        baseProgram,
+    }: RunnableInitArgs) {
         this.baseProgram = baseProgram
         this.leafSymbolMap = leafSymbolMap
 
         this.symbolMap = {}
-        dsl.symbols.forEach((s) => this.symbolMap[s.id] = s)
+        dsl.symbols.forEach((s) => (this.symbolMap[s.id] = s))
         this.parent = parent
         this.parentSymbolId = parentSymbolId
     }
 
     getSendFunction(symbolId: string): SendFunction | null {
         const symbol = this.symbolMap[symbolId]
-        const hasOutputs = symbol.wires.length > 0 &&
-            symbol.wires[0].length > 0
+        const hasOutputs = symbol.wires.length > 0 && symbol.wires[0].length > 0
 
         if (hasOutputs) {
             return (msg: unknown) => {
@@ -118,8 +121,7 @@ export class Runnable {
                  * If sendfn is null, that means we're at a terminal node.
                  * Calling all onTerminate hooks here.
                  */
-                Object.values(this.baseProgram.hooks['onTerminate'])
-                    .forEach((fn) => fn(msg))
+                Object.values(this.baseProgram.hooks['onTerminate']).forEach((fn) => fn(msg))
             }
         } else {
             const runnable = new Runnable({
