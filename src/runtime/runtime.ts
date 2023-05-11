@@ -5,6 +5,9 @@ import { Storage } from '../storage/typings.d.ts'
 import { LocalStorage } from '../storage/local.ts'
 import { stdpath } from '../../deps.ts'
 import createBaseApp from '../api/index.ts'
+import { AxiosInstance } from '../../../../Library/Caches/deno/npm/registry.npmjs.org/axios/1.4.0/index.d.ts'
+import { getAxiosInstance } from './axios.ts'
+import { RemoteStorage } from '../storage/remote.ts'
 
 const __dirname = new URL(import.meta.url).pathname
 
@@ -70,14 +73,17 @@ export class Runtime {
     mayaRuntimeToken: string
     ownerId: string
     environment: string
+    autoShutdownBehaviour: 'NEVER' | 'BY_LAST_USE'
+    maxIdleTime = 1800000
+
     app: Application
     dynamicRouter: Router
     comms: Comms
     functions: SymbolMethods
     storage: Storage
     program: Program | null
-    autoShutdownBehaviour: 'NEVER' | 'BY_LAST_USE'
-    maxIdleTime = 1800000
+    axiosInstance: AxiosInstance
+
 
     constructor(props: RuntimeInitArgs) {
         this.id = props.id
@@ -92,10 +98,22 @@ export class Runtime {
         this.dynamicRouter.prefix('/dynamic')
         this.comms = new Comms({ app: this.app })
         this.functions = getSymbolMethods(this)
-        this.storage = new LocalStorage({
-            basePath: stdpath.join(__dirname, '../../../temp'),
-        })
+        // this.storage = new LocalStorage({
+        //     basePath: stdpath.join(__dirname, '../../../temp'),
+        // })
         this.program = null
+        this.axiosInstance = getAxiosInstance(this)
+        this.storage = new RemoteStorage({
+            runtime: this
+        })
+    }
+
+    get appBackendBaseUrl() {
+        switch (this.environment) {
+            case 'STAGING': return 'https://api.dev.mayalabs.io/app'
+            case 'PRODUCTION': return 'https://api.mayalabs.io/app'
+            default: return 'http://localhost:5000'
+        }
     }
 
     async init() {
