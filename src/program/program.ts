@@ -1,17 +1,12 @@
 import { getSmallRandomId } from '../utils/misc.ts'
 import { Runtime } from '../runtime/runtime.ts'
-import { Symbol } from './program.d.ts'
+import { Symbol, SymbolOnMessageCallback, SymbolType } from '../../deps.ts'
 
 export type ProgramDSL = {
-    symbols: Symbol[]
+    symbols: SymbolType[]
 }
 
-type SendFunction = (msg: unknown) => unknown
-
-type SymbolInstance = {
-    onInit: (runtime: unknown | null) => Promise<unknown>
-    onMessage: (send: SendFunction, message: unknown) => Promise<unknown>
-}
+type SymbolInstance = Symbol
 
 type RunnableInitArgs = {
     dsl: ProgramDSL
@@ -26,7 +21,7 @@ type ProgramInitArgs = {
 }
 
 type LeafSymbolDef = {
-    dslRepresentation: Symbol
+    dslRepresentation: SymbolType
     instance: SymbolInstance
 }
 
@@ -34,9 +29,10 @@ type HookType = 'beforeSend' | 'onTerminate'
 type HookFunction = (...args: unknown[]) => Promise<unknown> | unknown
 type HookMap = Record<HookType, Record<string, HookFunction>>
 
+function emptyCallback(_: unknown) {}
 export class Runnable {
     leafSymbolMap: Record<string, LeafSymbolDef>
-    symbolMap: Record<string, Symbol>
+    symbolMap: Record<string, SymbolType>
     parent?: Runnable
     parentSymbolId?: string | null
     baseProgram: Program
@@ -57,7 +53,7 @@ export class Runnable {
         this.parentSymbolId = parentSymbolId
     }
 
-    getSendFunction(symbolId: string): SendFunction | null {
+    getSendFunction(symbolId: string): SymbolOnMessageCallback | null {
         const symbol = this.symbolMap[symbolId]
         const hasOutputs = symbol.wires.length > 0 && symbol.wires[0].length > 0
 
@@ -76,7 +72,12 @@ export class Runnable {
                         }
                     },
                 )
-                nextNodeIds.forEach((nodeId: string) => this.runSymbol(nodeId, msg))
+                nextNodeIds.forEach((nodeId: string) =>
+                    this.runSymbol(
+                        nodeId,
+                        msg as Record<string, unknown>,
+                    )
+                )
             }
         } else if (this.parent && this.parentSymbolId) {
             return this.parent.getSendFunction(this.parentSymbolId)
@@ -85,12 +86,13 @@ export class Runnable {
         return null
     }
 
-    initSymbols() {
+    initSymbols(initPromises: Promise<unknown>[] = []): Promise<unknown> {
         Object.values(this.symbolMap).forEach((symbol) => {
             if (!symbol.children || symbol?.children?.symbols?.length === 0) {
-                this.leafSymbolMap[symbol.id].instance.onInit(
-                    this.getSendFunction(symbol.id),
+                const promise = this.leafSymbolMap[symbol.id].instance.onInit(
+                    this.getSendFunction(symbol.id) || emptyCallback,
                 )
+                initPromises.push(promise)
             } else {
                 new Runnable({
                     dsl: { symbols: symbol.children.symbols },
@@ -98,12 +100,14 @@ export class Runnable {
                     parent: this,
                     parentSymbolId: symbol.id,
                     baseProgram: this.baseProgram,
-                }).initSymbols()
+                }).initSymbols(initPromises)
             }
         })
+
+        return Promise.all(initPromises)
     }
 
-    runSymbol(symbolId: string, msg: unknown) {
+    runSymbol(symbolId: string, msg: Record<string, unknown>) {
         if (this.baseProgram.stopped) {
             return
         }
@@ -114,9 +118,9 @@ export class Runnable {
             const sendfn = this.getSendFunction(symbolId)
             const symbolInstance = this.leafSymbolMap[symbolId]
             if (sendfn !== null) {
-                symbolInstance.instance.onMessage(sendfn, msg)
+                symbolInstance.instance._runtimeMessageHandler(msg, sendfn)
             } else {
-                symbolInstance.instance.onMessage((msg) => msg, msg)
+                symbolInstance.instance._runtimeMessageHandler(msg, (msg) => msg)
                 /**
                  * If sendfn is null, that means we're at a terminal node.
                  * Calling all onTerminate hooks here.
@@ -160,13 +164,13 @@ export class Program {
         this.stopped = false
     }
 
-    async getLeafSymbols(symbols: Symbol[], runtime?: Runtime) {
+    async getLeafSymbols(symbols: SymbolType[], runtime?: Runtime) {
         for (const i in symbols) {
             const symbol = symbols[i]
 
             if (!symbol.children || symbol?.children?.symbols?.length === 0) {
                 const SymbolClass = await import(symbol.type)
-                const symbolInstance = new SymbolClass.default(runtime)
+                const symbolInstance: Symbol = new SymbolClass.default(runtime)
                 this.leafSymbols[symbol.id] = {
                     instance: symbolInstance,
                     dslRepresentation: symbol,
@@ -177,7 +181,7 @@ export class Program {
         }
     }
 
-    runFrom(symbolId: string, msg: unknown) {
+    runFrom(symbolId: string, msg: Record<string, unknown>) {
         if (this.stopped) {
             return
         }
@@ -192,7 +196,7 @@ export class Program {
         /**
          * Initialise all symbols
          */
-        this.runnable.initSymbols()
+        await this.runnable.initSymbols()
     }
 
     addHook(type: HookType, fn: HookFunction) {

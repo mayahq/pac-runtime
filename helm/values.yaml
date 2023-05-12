@@ -1,4 +1,4 @@
-# Default values for mayanr.
+# Default values for pacruntime.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -12,67 +12,68 @@ username: mayahq
 runtimeId: testruntime
 
 autoShutdown:
-  behaviour: BY_LAST_USE
-  maxIdleTime: 1800000
+   behaviour: BY_LAST_USE
+   maxIdleTime: 1800000
 
 image:
-  repository: 981640987050.dkr.ecr.ap-south-1.amazonaws.com/mayalabs.io/pac-runtime
-  pullPolicy: Always
-  tag: development
-  pullSecret: mayanr-gitlab
+   repository: 981640987050.dkr.ecr.ap-south-1.amazonaws.com/mayalabs.io/pac-runtime
+   pullPolicy: Always
+   tag: development
+   pullSecret: mayanr-gitlab
 
 keys:
-  runtimeAuthToken: testruntimetoken
+   runtimeAuthToken: testruntimetoken
 
 imagePullSecrets: []
 
-nameOverride: "mayared"
-fullnameOverride: ""
+nameOverride: 'mayared'
+fullnameOverride: ''
 
 podAnnotations:
-  checksum: abc # Change this to trigger pod restart when `helm upgrade` is run
+   checksum: abc # Change this to trigger pod restart when `helm upgrade` is run
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+   {}
+   # fsGroup: 2000
 
 securityContext: {}
 
 service:
-  type: ClusterIP
-  port: 1880
-  targetPort: 1880
+   type: ClusterIP
+   port: 9023
+   targetPort: 9023
 
 ingress:
-  enabled: true
-  certificate: random-secret
-  annotations: 
-    certmanager.k8s.io/acme-challenge-type: dns01
-    certmanager.k8s.io/acme-dns01-provider: route53
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-read-timeout: '600'
-    nginx.ingress.kubernetes.io/rewrite-target: /
-  domain: dev.mayahq.com
-  tls:
-   - secretName: secret-rt
-     hosts:
-       - dev9-test.dev.mayahq.com
+   enabled: true
+   certificate: random-secret
+   annotations:
+      certmanager.k8s.io/acme-challenge-type: dns01
+      certmanager.k8s.io/acme-dns01-provider: route53
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-read-timeout: '600'
+      nginx.ingress.kubernetes.io/rewrite-target: /
+   domain: dev.mayahq.com
+   tls:
+      - secretName: secret-rt
+        hosts:
+           - dev9-test.dev.mayahq.com
 
 resources:
-  limits:
-    cpu: 2000m
-    memory: 1024Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+   limits:
+      cpu: 2000m
+      memory: 1024Mi
+   requests:
+      cpu: 100m
+      memory: 128Mi
 
 autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+   enabled: false
+   minReplicas: 1
+   maxReplicas: 100
+   targetCPUUtilizationPercentage: 80
 
-nodeSelector: 
-  mayapodselector: maya-runtime-nodes
+nodeSelector:
+   mayapodselector: maya-runtime-nodes
 
 tolerations: []
 

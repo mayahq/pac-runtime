@@ -1,17 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  # name: {{ include "mayanr.fullname" . }}
-  name: "rt-{{ .Values.runtimeId }}"
-  namespace: {{ .Values.namespace }}
-  labels:
-    {{- include "mayanr.labels" . | nindent 4 }}
+   # name: {{ include "pacruntime.fullname" . }}
+   name: 'rt-{{ .Values.runtimeId }}'
+   namespace: { { .Values.namespace } }
+   labels: { { - include "pacruntime.labels" . | nindent 4 } }
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
-      name: http
-  selector:
-    {{- include "mayanr.selectorLabels" . | nindent 4 }}
+   type: { { .Values.service.type } }
+   ports:
+      - port: { { .Values.service.port } }
+        targetPort: { { .Values.service.targetPort } }
+        protocol: TCP
+        name: http
+   selector: { { - include "pacruntime.selectorLabels" . | nindent 4 } }

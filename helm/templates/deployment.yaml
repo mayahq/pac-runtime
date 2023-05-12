@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # name: {{ include "mayanr.fullname" . }}
+  # name: {{ include "pacruntime.fullname" . }}
   name: "rt-{{ .Values.runtimeId }}"
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "mayanr.labels" . | nindent 4 }}
+    {{- include "pacruntime.labels" . | nindent 4 }}
     mayaResourceType: userRuntime
     userRuntimeOwner: {{ .Values.userRuntimeOwner }}
 spec:
@@ -14,7 +14,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "mayanr.selectorLabels" . | nindent 6 }}
+      {{- include "pacruntime.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,7 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "mayanr.selectorLabels" . | nindent 8 }}
+        {{- include "pacruntime.selectorLabels" . | nindent 8 }}
         mayaResourceType: userRuntime
         userRuntimeOwner: {{ .Values.userRuntimeOwner }}
     spec:
@@ -37,22 +37,22 @@ spec:
           args: []
           ports:
             - name: http
-              containerPort: 1880
+              containerPort: 9023
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           startupProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
             failureThreshold: 14
-            periodSeconds: 15
+            periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
