@@ -178,7 +178,7 @@ export class Program {
 
             if (!symbol.children || symbol?.children?.symbols?.length === 0) {
                 const SymbolClass = await import(symbol.type)
-                const symbolInstance: Symbol = new SymbolClass.default(runtime)
+                const symbolInstance: Symbol = new SymbolClass.default(runtime, symbol)
                 this.leafSymbols[symbol.id] = {
                     instance: symbolInstance,
                     dslRepresentation: symbol,
@@ -242,8 +242,8 @@ export class Program {
         if (!startingSymbolId) {
             const symbolsWithInputs: Record<string, boolean> = {}
             symbols.forEach((symbol) => {
-                symbol.wires.forEach((wireGroup) => {
-                    wireGroup.forEach((symbolId) => symbolsWithInputs[symbolId] = true)
+                symbol.wires.forEach((wireGroup: string[]) => {
+                    wireGroup.forEach((symbolId: string) => symbolsWithInputs[symbolId] = true)
                 })
             })
             for (const symbol of symbols) {
