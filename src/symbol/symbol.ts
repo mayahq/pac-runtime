@@ -125,7 +125,7 @@ class Symbol implements SymbolImpl {
             try {
                 const field: Property = { [property]: propVal }
                 if ((field[property] instanceof TypedInput)) {
-                    evaluated[property] = (propVal as TypedInput).evaluateField(symbol, msg)
+                    evaluated[property] = (propVal as TypedInput).evaluateField(symbol, property, msg)
                 } else {
                     evaluated[property] = {
                         value: propVal.value,
