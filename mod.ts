@@ -9,6 +9,7 @@ export type {
     OnMessageCallback,
     PrimitiveTypes,
     Property,
+    PropertyObject,
     Schema,
     SymbolDsl,
     TypedInputArgs,
