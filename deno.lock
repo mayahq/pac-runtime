@@ -167,7 +167,8 @@
       "async-lock": "async-lock@1.4.0",
       "axios": "axios@1.4.0",
       "lodash": "lodash@4.17.21",
-      "lodash@4.17.21": "lodash@4.17.21"
+      "lodash@4.17.21": "lodash@4.17.21",
+      "path-to-regexp": "path-to-regexp@6.2.1"
     },
     "packages": {
       "async-lock@1.4.0": {
@@ -221,6 +222,10 @@
         "dependencies": {
           "mime-db": "mime-db@1.52.0"
         }
+      },
+      "path-to-regexp@6.2.1": {
+        "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==",
+        "dependencies": {}
       },
       "proxy-from-env@1.1.0": {
         "integrity": "sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==",

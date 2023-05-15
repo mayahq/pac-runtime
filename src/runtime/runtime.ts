@@ -1,4 +1,4 @@
-import { Application, Router } from '../../deps.ts'
+import { Application, Router, RouterContext, RouterMiddleware } from '../../deps.ts'
 import { Program, ProgramDSL } from '../program/program.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
@@ -9,8 +9,12 @@ import { RemoteStorage } from '../storage/remote.ts'
 import { stdpath } from '../../test_deps.ts'
 import { LocalStorage } from '../storage/local.ts'
 import { ExecutionStatus, RuntimeInterface, SymbolMethods } from './runtime.d.ts'
+import { match, MatchFunction, pathToRegexp } from '../../deps.ts'
 
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
+type ParamsDictionary = {
+    [key: string]: string
+}
 
 type RuntimeInitArgs = {
     id: string
@@ -24,6 +28,15 @@ type RuntimeInitArgs = {
 type DeployArgs = {
     dsl: ProgramDSL
     saveToStorage?: boolean
+}
+
+type RouteHandler = (ctx: RouterContext<'/(.*)', ParamsDictionary, Record<string, any>>) => Promise<void>
+type DynamicRoute = {
+    method: string
+    regexp: RegExp
+    path: string
+    handler: RouteHandler
+    matchFunction: (path: string) => any
 }
 
 function getSymbolMethods(runtime: Runtime): SymbolMethods {
@@ -73,8 +86,10 @@ export class Runtime implements RuntimeInterface {
     storage: Storage
     program: Program | null
     axiosInstance: AxiosInstance
+    dynamicRoutes: DynamicRoute[]
 
     constructor(props: RuntimeInitArgs) {
+        console.log('runtime was constructed')
         this.id = props.id
         this.mayaRuntimeToken = props.mayaRuntimeToken
         this.ownerId = props.ownerId
@@ -94,6 +109,8 @@ export class Runtime implements RuntimeInterface {
         })
         this.program = null
         this.axiosInstance = getAxiosInstance(this)
+        this.dynamicRoutes = []
+
         // this.storage = new RemoteStorage({
         //     runtime: this,
         // })
@@ -110,16 +127,42 @@ export class Runtime implements RuntimeInterface {
         }
     }
 
+    addHttpRoute(method: string, path: string, handler: RouteHandler) {
+        const absolutePath = `/dynamic${path}`
+        const regexp = pathToRegexp(absolutePath)
+        const urlMatch: MatchFunction<Record<string, unknown>> = match(absolutePath, { decode: decodeURIComponent })
+        this.dynamicRoutes.push({
+            method,
+            regexp,
+            path: absolutePath,
+            handler,
+            matchFunction: urlMatch,
+        })
+    }
+
     async init() {
         this.comms.init()
         const dsl = await this.storage.get(this.id)
         await this.deploy({ dsl, saveToStorage: false })
 
-        /**
-         * Dynamic router for registering routes on /program
-         */
-        this.app.use((ctx, next) => this.dynamicRouter.routes()(ctx, next))
-        this.app.use((ctx, next) => this.dynamicRouter.allowedMethods()(ctx, next))
+        this.dynamicRouter.all('/(.*)', async (ctx) => {
+            const pathname = ctx.request.url.pathname
+            const dynamicRoute = this.dynamicRoutes.find((route) => route.regexp.test(pathname))
+            if (!dynamicRoute) {
+                ctx.response.status = 404
+                ctx.response.body = {
+                    message: `No matching route found for path ${pathname}`,
+                }
+                return
+            }
+
+            ctx.params = dynamicRoute.matchFunction(pathname)?.params
+
+            await dynamicRoute.handler(ctx)
+        })
+
+        this.app.use(this.dynamicRouter.allowedMethods())
+        this.app.use(this.dynamicRouter.routes())
 
         this.app.listen({ port: 9023 })
     }
@@ -127,12 +170,10 @@ export class Runtime implements RuntimeInterface {
     async deploy({ dsl, saveToStorage = true }: DeployArgs) {
         this.program?.stop()
         const program = new Program({ dsl })
+        this.dynamicRoutes = []
 
         // Re-create the dynamic router
         this.dynamicRouter = new Router().prefix('/dynamic')
-
-        // Re-create the comms channel
-        this.comms = new Comms({ app: this.app })
 
         await program.deploy(this)
         if (saveToStorage) {

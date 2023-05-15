@@ -17,12 +17,15 @@ type WebsocketMap = {
 }
 
 export class Comms implements CommsInterface {
+    id: string
     app: Application
     socketRouter: Router
     connections: WebsocketMap
     messageListeners: ListenerMap
 
     constructor({ app }: CommsInitArgs) {
+        this.id = getSmallRandomId()
+
         this.app = app
         this.socketRouter = new Router()
         this.socketRouter.prefix('/socket')
@@ -43,11 +46,12 @@ export class Comms implements CommsInterface {
             const ws = ctx.upgrade()
             ws.onopen = () => {
                 console.log('Got new websocket connection.')
+                this.connections[connectionId] = ws
             }
 
-            this.connections[connectionId] = ws
             ws.onclose = () => {
                 delete this.connections[connectionId]
+                console.log('Connection closed:', connectionId)
             }
 
             ws.onmessage = async (msg) => {
@@ -95,8 +99,7 @@ export class Comms implements CommsInterface {
 
     async broadcast(msg: ConnMessage) {
         const connections = Object.values(this.connections)
-        for (const i in connections) {
-            const conn = connections[i]
+        for (const conn of connections) {
             await conn.send(JSON.stringify(msg))
         }
     }
