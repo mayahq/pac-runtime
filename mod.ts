@@ -5,7 +5,6 @@ export { default as TypedInput } from './src/symbol/inputs/typedInput.ts'
 export type {
     Children,
     ComponentTypes,
-    FieldType,
     Metadata,
     OnMessageCallback,
     PrimitiveTypes,
@@ -18,5 +17,8 @@ export type {
     TypedMetadata,
     ValueType,
 } from './src/symbol/symbol.d.ts'
+
+import Field from './src/symbol/inputs/field.ts'
+export { Field }
 
 export { default as Symbol } from './src/symbol/symbol.ts'

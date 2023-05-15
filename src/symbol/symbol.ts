@@ -14,6 +14,13 @@ import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
 
+type SelfProperties = {
+    name: string
+    type: string
+    isConfig: boolean
+    description: string
+}
+
 class Symbol implements SymbolImpl {
     static type = ''
     static isConfig = false
@@ -84,6 +91,20 @@ class Symbol implements SymbolImpl {
         }
     }
 
+    getSelfSchema(): Schema {
+        return (this.constructor as any).schema as Schema
+    }
+
+    getSelfProperties(): SelfProperties {
+        const props = this.constructor as any
+        return {
+            type: props.type,
+            name: props.name,
+            description: props.description,
+            isConfig: props.isConfig,
+        }
+    }
+
     async _runtimeMessageHandler(msg: Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
         const vals: { [propName: string]: PropertyObject } = this.evaluateSymbolProperties(this, msg)
         await this.onMessage(msg, vals, callback)
@@ -99,8 +120,9 @@ class Symbol implements SymbolImpl {
     }
 
     private generateDslSchema(symbol: Symbol): { [name: string]: TypedMetadata } {
+        const { name, type } = this.getSelfProperties()
         const evaluated: { [name: string]: TypedMetadata } | undefined = {}
-        Object.entries(Symbol.schema.propertiesSchema).forEach(([property, propVal]) => {
+        Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
             try {
                 const field: Property = { [property]: propVal }
                 if ((field[property] instanceof TypedInput)) {
@@ -112,7 +134,7 @@ class Symbol implements SymbolImpl {
                     }
                 }
             } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
+                console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
                 throw error
             }
         })
@@ -120,20 +142,13 @@ class Symbol implements SymbolImpl {
     }
 
     private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
+        const { name, type } = this.getSelfProperties()
         const evaluated: { [propName: string]: PropertyObject } = {}
-        Object.entries(Symbol.schema.propertiesSchema).forEach(([property, propVal]) => {
+        Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
             try {
-                const field: Property = { [property]: propVal }
-                if ((field[property] instanceof TypedInput)) {
-                    evaluated[property] = (propVal as TypedInput).evaluateField(symbol, property, msg)
-                } else {
-                    evaluated[property] = {
-                        value: propVal.value,
-                        type: propVal.type,
-                    }
-                }
+                evaluated[property] = propVal.evaluateField(symbol, property, msg)
             } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${Symbol.type}:${Symbol.name}`, error)
+                console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
                 throw error
             }
         })
@@ -141,16 +156,17 @@ class Symbol implements SymbolImpl {
     }
 
     toJSON(): string {
+        const { type, isConfig, description } = this.getSelfProperties()
         const out: SymbolDsl = {
             id: this.id,
-            type: Symbol.type,
-            isConfig: Symbol.isConfig,
-            description: Symbol.description,
+            type: type,
+            isConfig: isConfig,
+            description: description,
             properties: this.properties,
             schema: {
-                editorProperties: Symbol.schema.editorProperties,
-                inputSchema: Symbol.schema.inputSchema,
-                outputSchema: Symbol.schema.outputSchema,
+                editorProperties: this.getSelfSchema().editorProperties,
+                inputSchema: this.getSelfSchema().inputSchema,
+                outputSchema: this.getSelfSchema().outputSchema,
                 propertiesSchema: this.generateDslSchema(this),
             },
             children: this.children,

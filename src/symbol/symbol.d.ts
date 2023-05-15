@@ -1,4 +1,5 @@
 import type TypedInput from './inputs/typedInput.ts'
+import type Field from './inputs/field.ts'
 
 export interface OnMessageCallback {
     (done: unknown): void
@@ -11,7 +12,6 @@ type PropertyObject = {
     value: ValueType
     type: PrimitiveTypes | TypedInputTypes
 }
-export type FieldType = PropertyObject | TypedInput
 
 export type PrimitiveTypes = 'str' | 'num' | 'bool'
 
@@ -65,7 +65,7 @@ export type TypedMetadata = {
     options?: TypedInputOptions
 }
 export interface Property {
-    [fieldName: string]: FieldType
+    [fieldName: string]: Field
 }
 
 export type Wires = Array<Array<string>> | [[]]

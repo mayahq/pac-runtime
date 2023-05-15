@@ -1,27 +1,22 @@
 import { Application, Router } from '../../deps.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
+import { CommsInterface, ConnMessage, EventListener } from './runtime.d.ts'
 
 type CommsInitArgs = {
     app: Application
 }
 
-type WebsocketMap = {
-    [key: string]: WebSocket
-}
-
-type ConnMessage = {
-    event: string
-    data: unknown
-}
-
-type EventListener = (msg: ConnMessage) => Promise<void>
 type ListenerMap = {
     [eventName: string]: {
         [listenerId: string]: EventListener
     }
 }
 
-export class Comms {
+type WebsocketMap = {
+    [key: string]: WebSocket
+}
+
+export class Comms implements CommsInterface {
     app: Application
     socketRouter: Router
     connections: WebsocketMap
@@ -92,7 +87,7 @@ export class Comms {
         return listenerId
     }
 
-    removeEventListener(event: string, listenerId: string) {
+    removeMessageListener(event: string, listenerId: string) {
         if (this.messageListeners?.[event]?.[listenerId]) {
             delete this.messageListeners[event][listenerId]
         }

@@ -138,6 +138,29 @@ const subflowDSL = [
     },
 ]
 
+const injectNodeDSL = [
+    {
+        'id': 'myinject',
+        'name': 'Inject hehe',
+        'type':
+            'https://raw.githubusercontent.com/mayahq/stdlib/main/inject/inject.ts?token=GHSAT0AAAAAACCGYYZ2WN7PI2IRWRCPTTTQZDCDWZA',
+        'wires': [[]],
+        'properties': {
+            'payload': {
+                'type': 'str',
+                'value': 'oogaboogabooga',
+            },
+        },
+        'children': {
+            'wires': {
+                'in': [[]],
+                'out': [[]],
+            },
+            'symbols': [],
+        },
+    },
+]
+
 type TestMessage = {
     test: string
 }

@@ -1,6 +1,12 @@
 import { Application, Router } from '../../deps.ts'
-import { Comms } from './comms.ts'
 import { AxiosInstance } from '../../deps.ts'
+
+export type ConnMessage = {
+    event: string
+    data: unknown
+}
+
+export type EventListener = (msg: ConnMessage) => Promise<void>
 
 export type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
 export type ExecutionStatus = 'RUNNING' | 'DONE'
@@ -9,6 +15,13 @@ export interface SymbolMethods {
     reportExecutionStatus: (status: ExecutionStatus) => Promise<void>
     sendMessage: (event: string, data: unknown) => Promise<void>
     setStatus: (status: SymbolStatus, message: string) => Promise<void>
+}
+
+export interface CommsInterface {
+    addMessageListener: (event: string, listener: EventListener) => string
+    removeMessageListener: (event: string, listenerId: string) => void
+    broadcast: (msg: ConnMessage) => Promise<void>
+    send: (connectionId: string, msg: ConnMessage) => Promise<void>
 }
 
 export interface RuntimeInterface {
@@ -21,8 +34,7 @@ export interface RuntimeInterface {
 
     app: Application
     dynamicRouter: Router
-    comms: Comms
+    comms: CommsInterface
     functions: SymbolMethods
-    program: Program | null
     axiosInstance: AxiosInstance
 }
