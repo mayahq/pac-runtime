@@ -12,6 +12,7 @@ import type {
 } from './symbol.d.ts'
 import generateId from '../utils/generateId.ts'
 import TypedInput from './inputs/typedInput.ts'
+import { Runtime } from '../runtime/runtime.ts'
 
 class Symbol implements SymbolImpl {
     static type = ''
@@ -51,13 +52,9 @@ class Symbol implements SymbolImpl {
     }
     wires: Wires = [[]]
 
-    runtime: {
-        [runtimeFields: string]: unknown
-    }
+    runtime: Runtime
 
-    constructor(runtime: {
-        [runtimeFields: string]: unknown
-    }, args: SymbolDsl) {
+    constructor(runtime: Runtime, args: SymbolDsl) {
         if (args.id) {
             this.id = args.id
         }
@@ -163,16 +160,16 @@ class Symbol implements SymbolImpl {
         return JSON.stringify(out, null, 2)
     }
 
-    static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
-        const dummy = {}
-        try {
-            const parsed: SymbolDsl = JSON.parse(symbolRepr)
-            const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
-            return sym
-        } catch (error) {
-            throw error
-        }
-    }
+    // static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
+    //     const dummy = {}
+    //     try {
+    //         const parsed: SymbolDsl = JSON.parse(symbolRepr)
+    //         const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
+    //         return sym
+    //     } catch (error) {
+    //         throw error
+    //     }
+    // }
 }
 
 export default Symbol
