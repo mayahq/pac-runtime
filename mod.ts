@@ -1,7 +1,6 @@
 export { default as exceptions } from './src/utils/exceptions.ts'
 //@ts-ignore: IDE error just ignore
-export { default as TypedInput } from './src/utils/typedInput.ts'
-export { default as generateId } from './src/utils/generateId.ts'
+export { default as TypedInput } from './src/symbol/inputs/typedInput.ts'
 
 export type {
     Children,

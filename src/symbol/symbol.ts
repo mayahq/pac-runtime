@@ -10,9 +10,9 @@ import type {
     TypedMetadata,
     Wires,
 } from './symbol.d.ts'
-import generateId from '../utils/generateId.ts'
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
+import { getSmallRandomId } from '../utils/misc.ts'
 
 class Symbol implements SymbolImpl {
     static type = ''
@@ -30,7 +30,7 @@ class Symbol implements SymbolImpl {
     }
     static description = ''
 
-    readonly id: string = generateId()
+    readonly id: string = getSmallRandomId()
     readonly properties: {
         [fieldName: string]: PropertyObject
     }

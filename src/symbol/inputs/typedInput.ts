@@ -9,7 +9,7 @@ import {
     TypedMetadata,
     ValueType,
 } from '../symbol.d.ts'
-import Fields from '../fields.ts'
+import Fields from './fields.ts'
 
 class TypedInput extends Fields {
     value: ValueType = ''
