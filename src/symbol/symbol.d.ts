@@ -44,7 +44,7 @@ export type TypedInputArgs = {
     value?: ValueType
     type: TypedInputTypes
     allowedTypes?: ListInputTypes
-    defaultValue?: string | TypedInput
+    defaultValue?: ValueType
     label?: string
     width?: string
     placeholder?: string
