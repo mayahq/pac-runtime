@@ -1,14 +1,13 @@
 import { getSmallRandomId } from '../utils/misc.ts'
 import { Runtime } from '../runtime/runtime.ts'
-import { Symbol, SymbolOnMessageCallback, SymbolType } from '../../deps.ts'
+import { OnMessageCallback, SymbolDsl } from '../symbol/symbol.d.ts'
+import Symbol from '../symbol/symbol.ts'
 
 export type ProgramDSL = {
-    symbols: SymbolType[]
+    symbols: SymbolDsl[]
 }
 
 type SymbolMessage = Record<string, unknown>
-
-type SymbolInstance = Symbol
 
 type RunnableInitArgs = {
     dsl: ProgramDSL
@@ -23,8 +22,8 @@ type ProgramInitArgs = {
 }
 
 type LeafSymbolDef = {
-    dslRepresentation: SymbolType
-    instance: SymbolInstance
+    dslRepresentation: SymbolDsl
+    instance: Symbol
 }
 
 type HookType = 'beforeSend' | 'onTerminate'
@@ -40,7 +39,7 @@ type EvalArgs = {
 function emptyCallback(_: unknown) {}
 export class Runnable {
     leafSymbolMap: Record<string, LeafSymbolDef>
-    symbolMap: Record<string, SymbolType>
+    symbolMap: Record<string, SymbolDsl>
     parent?: Runnable
     parentSymbolId?: string | null
     baseProgram: Program
@@ -61,7 +60,7 @@ export class Runnable {
         this.parentSymbolId = parentSymbolId
     }
 
-    getSendFunction(symbolId: string): SymbolOnMessageCallback | null {
+    getSendFunction(symbolId: string): OnMessageCallback | null {
         const symbol = this.symbolMap[symbolId]
         const hasOutputs = symbol.wires.length > 0 && symbol.wires[0].length > 0
 
@@ -172,7 +171,7 @@ export class Program {
         this.stopped = false
     }
 
-    async getLeafSymbols(symbols: SymbolType[], runtime?: Runtime) {
+    async getLeafSymbols(symbols: SymbolDsl[], runtime?: Runtime) {
         for (const i in symbols) {
             const symbol = symbols[i]
 
@@ -242,8 +241,8 @@ export class Program {
         if (!startingSymbolId) {
             const symbolsWithInputs: Record<string, boolean> = {}
             symbols.forEach((symbol) => {
-                symbol.wires.forEach((wireGroup: string[]) => {
-                    wireGroup.forEach((symbolId: string) => symbolsWithInputs[symbolId] = true)
+                symbol.wires.forEach((wireGroup) => {
+                    wireGroup.forEach((symbolId) => symbolsWithInputs[symbolId] = true)
                 })
             })
             for (const symbol of symbols) {

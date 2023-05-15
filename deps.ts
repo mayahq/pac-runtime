@@ -6,8 +6,3 @@ export { default as lodash } from 'npm:lodash'
 
 import { AxiosInstance as AInstance } from 'npm:axios'
 export type AxiosInstance = AInstance
-
-import { OnMessageCallback, Symbol as Sym, SymbolType as SType } from 'https://deno.land/x/mayalabs_symbols/mod.ts'
-export type SymbolType = SType
-export type Symbol = Sym
-export type SymbolOnMessageCallback = OnMessageCallback
