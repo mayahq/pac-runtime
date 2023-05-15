@@ -91,7 +91,7 @@ class Symbol implements SymbolImpl {
     async onInit(_callback: OnMessageCallback): Promise<void> {
     }
 
-    private async onMessage(
+    async onMessage(
         _msg: Record<string, any>,
         _vals: Record<string, any>,
         _callback: OnMessageCallback,
