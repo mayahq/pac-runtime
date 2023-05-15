@@ -6,6 +6,8 @@ export type ProgramDSL = {
     symbols: SymbolType[]
 }
 
+type SymbolMessage = Record<string, unknown>
+
 type SymbolInstance = Symbol
 
 type RunnableInitArgs = {
@@ -28,6 +30,12 @@ type LeafSymbolDef = {
 type HookType = 'beforeSend' | 'onTerminate'
 type HookFunction = (...args: unknown[]) => Promise<unknown> | unknown
 type HookMap = Record<HookType, Record<string, HookFunction>>
+
+type EvalArgs = {
+    dsl: ProgramDSL
+    startingSymbolId: string
+    msg: SymbolMessage
+}
 
 function emptyCallback(_: unknown) {}
 export class Runnable {
@@ -75,7 +83,7 @@ export class Runnable {
                 nextNodeIds.forEach((nodeId: string) =>
                     this.runSymbol(
                         nodeId,
-                        msg as Record<string, unknown>,
+                        msg as SymbolMessage,
                     )
                 )
             }
@@ -107,7 +115,7 @@ export class Runnable {
         return Promise.all(initPromises)
     }
 
-    runSymbol(symbolId: string, msg: Record<string, unknown>) {
+    runSymbol(symbolId: string, msg: SymbolMessage) {
         if (this.baseProgram.stopped) {
             return
         }
@@ -181,7 +189,7 @@ export class Program {
         }
     }
 
-    runFrom(symbolId: string, msg: Record<string, unknown>) {
+    runFrom(symbolId: string, msg: SymbolMessage) {
         if (this.stopped) {
             return
         }
@@ -205,11 +213,55 @@ export class Program {
         return hookId
     }
 
+    removeHook(type: HookType, hookId: string) {
+        delete this.hooks[type][hookId]
+    }
+
     stop() {
         this.stopped = true
     }
 
     start() {
         this.stopped = false
+    }
+
+    private async evaluate(symbolId: string, msg: SymbolMessage): Promise<SymbolMessage> {
+        await this.deploy()
+        return await new Promise((resolve) => {
+            const id = this.addHook('onTerminate', (msg) => {
+                resolve(msg as SymbolMessage)
+                this.removeHook('onTerminate', id)
+            })
+
+            this.runFrom(symbolId, msg)
+        })
+    }
+
+    static async eval({ dsl, startingSymbolId = '', msg }: EvalArgs): Promise<SymbolMessage> {
+        const symbols = dsl.symbols
+        if (!startingSymbolId) {
+            const symbolsWithInputs: Record<string, boolean> = {}
+            symbols.forEach((symbol) => {
+                symbol.wires.forEach((wireGroup) => {
+                    wireGroup.forEach((symbolId) => symbolsWithInputs[symbolId] = true)
+                })
+            })
+            for (const symbol of symbols) {
+                if (!symbolsWithInputs[symbol.id]) {
+                    startingSymbolId = symbol.id
+                }
+                break
+            }
+        }
+
+        if (!startingSymbolId) {
+            throw new Error('No starting symbolId provided, and unable to auto-infer it')
+        }
+
+        console.log('Using starting symbolId:', startingSymbolId)
+
+        const program = new Program({ dsl })
+        const result = await program.evaluate(startingSymbolId, msg)
+        return result
     }
 }

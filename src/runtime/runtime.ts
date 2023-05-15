@@ -6,6 +6,7 @@ import createBaseApp from '../api/index.ts'
 import { AxiosInstance } from '../../deps.ts'
 import { getAxiosInstance } from './axios.ts'
 import { RemoteStorage } from '../storage/remote.ts'
+import { ExecutionStatus, SymbolMethods } from './runtime.d.ts'
 
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 
@@ -16,15 +17,6 @@ type RuntimeInitArgs = {
     environment: string
     autoShutdownBehaviour: AutoShutdownBehaviour
     maxIdleTime: number
-}
-
-type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
-type ExecutionStatus = 'RUNNING' | 'DONE'
-
-interface SymbolMethods {
-    reportExecutionStatus: (status: ExecutionStatus) => Promise<void>
-    sendMessage: (event: string, data: unknown) => Promise<void>
-    setStatus: (status: SymbolStatus, message: string) => Promise<void>
 }
 
 type DeployArgs = {
