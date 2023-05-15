@@ -68,7 +68,7 @@ class TypedInput extends Fields {
         }
     }
 
-    evaluateField(symbol: Symbol, msg: Record<string, unknown>): PropertyObject {
+    evaluateField(symbol: Symbol, propertyName: string, msg: Record<string, unknown>): PropertyObject {
         const evaluated: PropertyObject = {
             type: 'str',
             value: '',
@@ -85,17 +85,17 @@ class TypedInput extends Fields {
             case 'jsonata':
             case 'config': {
                 evaluated.type = this.type
-                evaluated.value = this.value
+                evaluated.value = symbol.properties[propertyName]
                 break
             }
             case 'global': {
-                const keyDepth: string[] = (this.value?.toString() || '').split('.') || []
+                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
                 evaluated.type = this.type
                 // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
                 break
             }
             case 'msg': {
-                const keyDepth: string[] = (this.value?.toString() || '').split('.') || []
+                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
                 evaluated.type = this.type
                 evaluated.value = lodash.get(msg, keyDepth)
                 break
