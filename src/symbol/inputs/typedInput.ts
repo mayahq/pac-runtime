@@ -79,7 +79,7 @@ class TypedInput extends Fields {
             type: 'str',
             value: '',
         }
-        switch (this.type) {
+        switch (symbol.properties[propertyName].type) {
             case 'str':
             case 'num':
             case 'bool':
