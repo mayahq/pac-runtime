@@ -49,6 +49,7 @@ export type TypedInputArgs = {
     width?: string
     placeholder?: string
     allowInput?: boolean
+    required?: boolean
 }
 
 export type TypedInputOptions = {
@@ -128,13 +129,13 @@ export interface SymbolDsl {
     id: string
     type: string
     description?: string
-    isConfig: boolean
+    isConfig?: boolean
     properties?: {
         [fieldName: string]: PropertyObject
     }
     children?: Children
     metadata?: Metadata
-    schema: {
+    schema?: {
         inputSchema?: {
             [name: string]: {
                 type: unknown
