@@ -21,6 +21,7 @@ class TypedInput extends Fields {
     width?: string
     placeholder?: string
     defaultValue?: ValueType = ''
+    required = false
 
     constructor(input: TypedInputArgs) {
         super()
@@ -65,6 +66,11 @@ class TypedInput extends Fields {
         }
         if (input.placeholder) {
             this!['placeholder'] = input.placeholder
+        }
+        if (input.required) {
+            this.required = input.required
+        } else {
+            this.required = false
         }
     }
 
