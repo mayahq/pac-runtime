@@ -3,6 +3,7 @@ import TypedInput from './typedInput.ts'
 import Symbol from '../symbol.ts'
 
 abstract class Field {
+    abstract required: boolean
     abstract evaluateField(symbol: Symbol, propertyName: string, msg: Record<string, unknown>): PropertyObject
     abstract generateSchema(
         propertyName: string,
