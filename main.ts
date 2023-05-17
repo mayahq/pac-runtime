@@ -1,5 +1,5 @@
 import { AutoShutdownBehaviour, Runtime } from './src/runtime/runtime.ts'
-import { getEnvVariableOrCrash } from './src/Utils/misc.ts'
+import { getEnvVariableOrCrash } from './src/utils/misc.ts'
 import { loadEnv } from './deps.ts'
 
 await loadEnv({

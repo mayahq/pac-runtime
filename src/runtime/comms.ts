@@ -1,5 +1,5 @@
 import { Application, Router } from '../../deps.ts'
-import { getSmallRandomId } from '../Utils/misc.ts'
+import { getSmallRandomId } from '../utils/misc.ts'
 import { CommsInterface, ConnMessage, EventListener } from './runtime.d.ts'
 
 type CommsInitArgs = {

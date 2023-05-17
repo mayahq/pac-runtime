@@ -12,7 +12,7 @@ import type {
 } from './symbol.d.ts'
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
-import { getSmallRandomId } from '../Utils/misc.ts'
+import { getSmallRandomId } from '../utils/misc.ts'
 
 type SelfProperties = {
     name: string

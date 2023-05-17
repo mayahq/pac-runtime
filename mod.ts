@@ -1,4 +1,4 @@
-export { default as exceptions } from './src/Utils/exceptions.ts'
+export { default as exceptions } from './src/utils/exceptions.ts'
 //@ts-ignore: IDE error just ignore
 export { default as TypedInput } from './src/symbol/inputs/typedInput.ts'
 
