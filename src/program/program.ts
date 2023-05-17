@@ -1,4 +1,4 @@
-import { getSmallRandomId } from '../utils/misc.ts'
+import { getSmallRandomId } from '../Utils/misc.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { OnMessageCallback, SymbolDsl } from '../symbol/symbol.d.ts'
 import Symbol from '../symbol/symbol.ts'
@@ -176,6 +176,7 @@ export class Program {
             const symbol = symbols[i]
 
             if (!symbol.children || symbol?.children?.symbols?.length === 0) {
+                console.log('🚀 ~ file: program.ts:180 ~ Program ~ getLeafSymbols ~ symbol.type:', symbol.type)
                 const SymbolClass = await import(symbol.type)
                 const symbolInstance: Symbol = new SymbolClass.default(runtime, symbol)
                 this.leafSymbols[symbol.id] = {

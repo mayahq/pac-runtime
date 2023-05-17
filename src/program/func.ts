@@ -1,4 +1,4 @@
-import { getSmallRandomId } from '../utils/misc.ts'
+import { getSmallRandomId } from '../Utils/misc.ts'
 
 type SymbolType = {
     id: string
