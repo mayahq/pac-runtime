@@ -12,7 +12,7 @@ import type {
 } from './symbol.d.ts'
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
-import { getSmallRandomId } from '../utils/misc.ts'
+import { getSmallRandomId } from '../Utils/misc.ts'
 
 type SelfProperties = {
     name: string
@@ -106,7 +106,7 @@ class Symbol implements SymbolImpl {
     }
 
     async _runtimeMessageHandler(msg: Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
-        const vals: { [propName: string]: PropertyObject } = this.evaluateSymbolProperties(this, msg)
+        const vals: { [propName: string]: unknown } = this.evaluateSymbolProperties(this, msg)
         await this.onMessage(msg, vals, callback)
     }
     async onInit(_callback: OnMessageCallback): Promise<void> {
@@ -143,10 +143,10 @@ class Symbol implements SymbolImpl {
 
     private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
         const { name, type } = this.getSelfProperties()
-        const evaluated: { [propName: string]: PropertyObject } = {}
+        const evaluated: { [propName: string]: unknown } = {}
         Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
             try {
-                evaluated[property] = propVal.evaluateField(symbol, property, msg)
+                evaluated[property] = propVal.evaluateField(symbol, property, msg)['value']
             } catch (error) {
                 console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
                 throw error

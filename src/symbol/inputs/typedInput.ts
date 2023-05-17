@@ -28,6 +28,8 @@ class TypedInput extends Fields {
         this.type = input.type
         if (input.value) {
             this.value = input.value
+        } else if (!input.value && input.defaultValue) {
+            this.value = input.defaultValue
         }
         switch (input.type) {
             case 'str':
@@ -90,20 +92,20 @@ class TypedInput extends Fields {
             case 'json':
             case 'jsonata':
             case 'config': {
-                evaluated.type = this.type
-                evaluated.value = symbol.properties[propertyName]
+                evaluated.type = symbol.properties[propertyName].type
+                evaluated.value = symbol.properties[propertyName].value
                 break
             }
             case 'global': {
-                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
-                evaluated.type = this.type
+                const keyDepth: string = symbol.properties[propertyName].value?.toString() || ''
+                evaluated.type = symbol.properties[propertyName].type
                 // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
                 break
             }
             case 'msg': {
-                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
-                evaluated.type = this.type
-                evaluated.value = lodash.get(msg, keyDepth)
+                // const keyDepth: string = symbol.properties[propertyName].value?.toString() || ''
+                evaluated.type = symbol.properties[propertyName].type
+                evaluated.value = lodash.get(msg, symbol.properties[propertyName].value)
                 break
             }
         }
