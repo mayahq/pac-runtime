@@ -106,7 +106,10 @@ class Symbol implements SymbolImpl {
     }
 
     async _runtimeMessageHandler(msg: Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
-        const vals: { [propName: string]: unknown } = this.evaluateSymbolProperties(this, msg)
+        const vals: { [propName: string]: unknown } = {}
+        Object.entries(this.evaluateSymbolProperties(this, msg)).forEach(([prop, propObj]) => {
+            vals[prop] = propObj.value
+        })
         await this.onMessage(msg, vals, callback)
     }
     async onInit(_callback: OnMessageCallback): Promise<void> {
@@ -143,10 +146,10 @@ class Symbol implements SymbolImpl {
 
     private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
         const { name, type } = this.getSelfProperties()
-        const evaluated: { [propName: string]: unknown } = {}
+        const evaluated: { [propName: string]: PropertyObject } = {}
         Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
             try {
-                evaluated[property] = propVal.evaluateField(symbol, property, msg)['value']
+                evaluated[property] = propVal.evaluateField(symbol, property, msg)
             } catch (error) {
                 console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
                 throw error
