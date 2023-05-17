@@ -8,8 +8,8 @@ import { getAxiosInstance } from './axios.ts'
 import { ExecutionStatus, RuntimeInterface, SymbolMethods } from './runtime.d.ts'
 import { match, MatchFunction, pathToRegexp } from '../../deps.ts'
 import { RemoteStorage } from '../storage/remote.ts'
-// import { stdpath } from '../../test_deps.ts'
-// import { LocalStorage } from '../storage/local.ts'
+import { stdpath } from '../../test_deps.ts'
+import { LocalStorage } from '../storage/local.ts'
 
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 type ParamsDictionary = {
@@ -103,17 +103,17 @@ export class Runtime implements RuntimeInterface {
         this.comms = new Comms({ app: this.app })
         this.functions = getSymbolMethods(this)
 
-        // const __dirname = new URL(import.meta.url).pathname
-        // this.storage = new LocalStorage({
-        //     basePath: stdpath.join(__dirname, '../../../temp'),
-        // })
+        const __dirname = new URL(import.meta.url).pathname
+        this.storage = new LocalStorage({
+            basePath: stdpath.join(__dirname, '../../../temp'),
+        })
         this.program = null
         this.axiosInstance = getAxiosInstance(this)
         this.dynamicRoutes = []
 
-        this.storage = new RemoteStorage({
-            runtime: this,
-        })
+        // this.storage = new RemoteStorage({
+        //     runtime: this,
+        // })
     }
 
     get appBackendBaseUrl() {
