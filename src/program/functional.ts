@@ -17,7 +17,6 @@ type FRunnableInitArgs = {
     leafSymbolMap: Record<string, LeafSymbolDef>
     parent?: FRunnable
     parentSymbolId?: string | null
-    baseProgram: FProgram
     symbolId: string
 }
 
@@ -42,7 +41,6 @@ export class FRunnable {
     symbolMap: Record<string, FunctionalSymbolDsl>
     parent?: FRunnable
     parentSymbolId?: string | null
-    baseProgram: FProgram
     fieldLocks: AsyncLock
     symbolId: string
     symbolFieldVals: Record<string, any>
@@ -55,7 +53,6 @@ export class FRunnable {
         this.symbolMap = {}
 
         args.dsl.symbols.forEach((s) => this.symbolMap[s.id] = s)
-        this.baseProgram = args.baseProgram
 
         this.parent = args.parent
         this.parentSymbolId = args.parentSymbolId
@@ -94,7 +91,6 @@ export class FRunnable {
                             } else {
                                 const runnable = new FRunnable({
                                     symbolId: field.symbolId,
-                                    baseProgram: this.baseProgram,
                                     dsl: this.dsl,
                                     leafSymbolMap: this.leafSymbolMap,
                                     parent: this.parent,
@@ -139,7 +135,6 @@ export class FRunnable {
         return await Promise.all(outputChildren.map((symbol) => {
             const runnable = new FRunnable({
                 symbolId: symbol.id,
-                baseProgram: this.baseProgram,
                 dsl: this.dsl,
                 leafSymbolMap: this.leafSymbolMap,
                 parent: this,
@@ -154,7 +149,6 @@ export class FRunnable {
             if (!symbol.children || symbol.children.symbols.length === 0) {
                 const promise = this.leafSymbolMap[symbol.id].instance.onInit(
                     new FRunnable({
-                        baseProgram: this.baseProgram,
                         dsl: this.dsl,
                         leafSymbolMap: this.leafSymbolMap,
                         symbolId: symbol.id,
@@ -167,7 +161,6 @@ export class FRunnable {
                 new FRunnable({
                     dsl: { symbols: symbol.children.symbols },
                     leafSymbolMap: this.leafSymbolMap,
-                    baseProgram: this.baseProgram,
                     symbolId: symbol.id,
                     parent: this,
                     parentSymbolId: this.symbolId,
