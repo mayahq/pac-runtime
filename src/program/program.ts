@@ -36,6 +36,15 @@ type EvalArgs = {
     msg: SymbolMessage
 }
 
+function isUrl(url: string) {
+    try {
+        new URL(url)
+        return true
+    } catch (_) {
+        return false
+    }
+}
+
 function emptyCallback(_: unknown) {}
 export class Runnable {
     leafSymbolMap: Record<string, LeafSymbolDef>
@@ -171,12 +180,32 @@ export class Program {
         this.stopped = false
     }
 
+    private async importSymbolType(type: string) {
+        if (type.startsWith('gh:')) {
+            // gh:mayahq/stdlib/http
+            const location = type.replace('gh:', '').trim()
+            const locationParts = location.split('/')
+            if (locationParts.length !== 3) {
+                throw new Error(`Invalid github type path: ${type}`)
+            }
+            const [user, repo, symbolName]: string[] = locationParts
+            return await import(`https://raw.githubusercontent.com/${user}/${repo}/${symbolName}/${symbolName}.ts`)
+        } else if (type.startsWith('ghPath')) {
+            const location = type.replace('ghPath:', '').trim()
+            return await import(`https://raw.githubusercontent.com/${location}.ts`)
+        } else if (isUrl(type)) {
+            return await import(type)
+        } else {
+            return await import(`https://deno.land/x/${type}.ts`)
+        }
+    }
+
     async getLeafSymbols(symbols: SymbolDsl[], runtime?: Runtime) {
         for (const i in symbols) {
             const symbol = symbols[i]
 
             if (!symbol.children || symbol?.children?.symbols?.length === 0) {
-                const SymbolClass = await import(symbol.type)
+                const SymbolClass = await this.importSymbolType(symbol.type)
                 const symbolInstance: Symbol = new SymbolClass.default(runtime, symbol)
                 this.leafSymbols[symbol.id] = {
                     instance: symbolInstance,
@@ -224,7 +253,7 @@ export class Program {
         this.stopped = false
     }
 
-    private async evaluate(symbolId: string, msg: SymbolMessage): Promise<SymbolMessage> {
+    async _evaluate(symbolId: string, msg: SymbolMessage): Promise<SymbolMessage> {
         await this.deploy()
         return await new Promise((resolve) => {
             const id = this.addHook('onTerminate', (msg) => {
@@ -260,7 +289,7 @@ export class Program {
         console.log('Using starting symbolId:', startingSymbolId)
 
         const program = new Program({ dsl })
-        const result = await program.evaluate(startingSymbolId, msg)
+        const result = await program._evaluate(startingSymbolId, msg)
         return result
     }
 }
