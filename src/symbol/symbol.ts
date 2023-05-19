@@ -13,6 +13,7 @@ import type {
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
+import { FRunnable } from '../program/functional.ts'
 
 type SelfProperties = {
     name: string
@@ -105,18 +106,18 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    async _runtimeMessageHandler(msg: Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
-        const vals: { [propName: string]: PropertyObject } = this.evaluateSymbolProperties(this, msg)
-        await this.onMessage(msg, vals, callback)
+    async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
+        await this.call(runner, args)
     }
-    async onInit(_callback: OnMessageCallback): Promise<void> {
+    async init(_runner: FRunnable): Promise<void> {
+        // Left for the symbol developer to override
     }
 
-    async onMessage(
-        _msg: Record<string, any>,
-        _vals: Record<string, any>,
-        _callback: OnMessageCallback,
+    async call(
+        _runner: FRunnable,
+        _args: Record<string, unknown>,
     ): Promise<void> {
+        // Left for the symbol developer to override
     }
 
     private generateDslSchema(symbol: Symbol): { [name: string]: TypedMetadata } {

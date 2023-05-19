@@ -13,10 +13,10 @@ import Fields from './field.ts'
 
 class TypedInput extends Fields {
     value: ValueType = ''
-    type: TypedInputTypes = 'str'
+    type: TypedInputTypes = 'string'
     label?: string
     component?: ComponentTypes = 'input'
-    allowedTypes?: ListInputTypes = ['str', 'msg', 'global']
+    allowedTypes?: ListInputTypes = ['string', 'msg', 'global']
     allowInput?: boolean = true
     width?: string
     placeholder?: string
@@ -30,9 +30,9 @@ class TypedInput extends Fields {
             this.value = input.value
         }
         switch (input.type) {
-            case 'str':
-            case 'num':
-            case 'bool':
+            case 'string':
+            case 'number':
+            case 'boolean':
             case 'date':
             case 're':
             case 'msg':

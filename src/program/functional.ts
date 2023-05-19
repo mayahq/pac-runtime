@@ -1,29 +1,32 @@
 import { FunctionalProgramDsl, FunctionalSymbolDsl } from './program.d.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
+import { getSmallRandomId } from '../utils/misc.ts'
 // import Symbol from '../symbol/symbol.ts'
 
 interface Symbol {
-    onInit: (runnableInstance: FRunnable) => Promise<void>
-    onExecute: (runnableInstance: FRunnable, args?: Record<string, any>) => Promise<any>
+    init: (runnableInstance: FRunnable) => Promise<void>
+    call: (runnableInstance: FRunnable, args?: Record<string, any>) => Promise<any>
 }
 
 type FProgramInitArgs = {
     dsl: FunctionalProgramDsl
+    rootNodeId: string
 }
 
 type FRunnableInitArgs = {
-    dsl: FunctionalProgramDsl
+    symbolDef: FunctionalSymbolDsl
     leafSymbolMap: Record<string, LeafSymbolDef>
     parent?: FRunnable
     parentSymbolId?: string | null
-    symbolId: string
 }
 
 type LeafSymbolDef = {
     dslRepresentation: FunctionalSymbolDsl
     instance: Symbol
 }
+
+type EvaluateFieldFunc = (args?: Record<string, any>) => any
 
 function isUrl(url: string) {
     try {
@@ -34,38 +37,28 @@ function isUrl(url: string) {
     }
 }
 
-type EvaluateFieldFunc = (args: Record<string, any>) => any
-
 export class FRunnable {
+    symbolDef: FunctionalSymbolDsl
     leafSymbolMap: Record<string, LeafSymbolDef>
-    symbolMap: Record<string, FunctionalSymbolDsl>
     parent?: FRunnable
-    parentSymbolId?: string | null
-    fieldLocks: AsyncLock
-    symbolId: string
+
+    fieldLocks: typeof AsyncLock
     symbolFieldVals: Record<string, any>
-    dsl: FunctionalProgramDsl
 
     constructor(args: FRunnableInitArgs) {
-        this.dsl = args.dsl
-        this.symbolId = args.symbolId
         this.leafSymbolMap = args.leafSymbolMap
-        this.symbolMap = {}
-
-        args.dsl.symbols.forEach((s) => this.symbolMap[s.id] = s)
-
+        this.symbolDef = args.symbolDef
         this.parent = args.parent
-        this.parentSymbolId = args.parentSymbolId
+
         this.fieldLocks = new AsyncLock()
         this.symbolFieldVals = {}
     }
 
     private getFieldSpec(name: string) {
-        return this.symbolMap[this.symbolId].inputs[name]
+        return this.symbolDef.inputs[name]
     }
 
-    getEvaluateSymbolFieldFunction(name: string): EvaluateFieldFunc {
-        console.log('field:', name)
+    private getEvaluateSymbolFieldFunction(name: string): EvaluateFieldFunc {
         const field = this.getFieldSpec(name)
         switch (field.type) {
             case 'lambda_input': {
@@ -89,12 +82,16 @@ export class FRunnable {
                             if (this.symbolFieldVals[field.symbolId]) {
                                 return done(null, _.get(this.symbolFieldVals[field.symbolId], field.value))
                             } else {
+                                const nextSymbolDef = this.parent!.symbolDef.children.symbols.find((s) =>
+                                    s.id === field.symbolId
+                                )
+                                if (!nextSymbolDef) {
+                                    return done(new Error(`Symbol with ID ${field.symbolId} does not exist`), null)
+                                }
                                 const runnable = new FRunnable({
-                                    symbolId: field.symbolId,
-                                    dsl: this.dsl,
+                                    symbolDef: nextSymbolDef,
                                     leafSymbolMap: this.leafSymbolMap,
                                     parent: this.parent,
-                                    parentSymbolId: this.parent?.symbolId,
                                 })
                                 const result = await runnable.run(args)
                                 this.symbolFieldVals[field.symbolId] = result
@@ -110,65 +107,61 @@ export class FRunnable {
                 }
             }
             default:
-                return async (_: Record<string, any>) => field.value
+                return async (_?: Record<string, any>) => field.value
         }
+    }
+
+    evaluateProperty(name: string, args?: Record<string, any>) {
+        const evaluatePropertyFunc = this.getEvaluateSymbolFieldFunction(name)
+        return evaluatePropertyFunc(args)
     }
 
     async run(args?: Record<string, any>): Promise<any> {
         /**
          * Execute the symbol if its a leaf symbol
          */
-        if (this.leafSymbolMap[this.symbolId]) {
-            return await this.leafSymbolMap[this.symbolId].instance.onExecute(this, args)
+        if (this.leafSymbolMap[this.symbolDef.id]) {
+            return await this.leafSymbolMap[this.symbolDef.id].instance.call(this, args)
         }
 
-        // Now we know its a fucking subflow, gotta do recursion.
-        const symbol = this.symbolMap[this.symbolId]
+        /**
+         * This is a lambda. Execute it with a
+         */
         const outputChildren: FunctionalSymbolDsl[] = []
-
-        symbol.children.symbols.forEach((s) => {
-            if (symbol.children.out.includes(s.id)) {
+        this.symbolDef.children.symbols.forEach((s) => {
+            if (this.symbolDef.children.out.includes(s.id)) {
                 outputChildren.push(s)
             }
         })
 
         return await Promise.all(outputChildren.map((symbol) => {
             const runnable = new FRunnable({
-                symbolId: symbol.id,
-                dsl: this.dsl,
+                symbolDef: symbol,
                 leafSymbolMap: this.leafSymbolMap,
                 parent: this,
-                parentSymbolId: this.symbolId,
             })
             return runnable.run(args)
         }))
     }
 
-    async init(initPromises: Promise<any>[] = []) {
-        Object.values(this.symbolMap).forEach((symbol) => {
-            if (!symbol.children || symbol.children.symbols.length === 0) {
-                const promise = this.leafSymbolMap[symbol.id].instance.onInit(
-                    new FRunnable({
-                        dsl: this.dsl,
-                        leafSymbolMap: this.leafSymbolMap,
-                        symbolId: symbol.id,
-                        parent: this,
-                        parentSymbolId: this.parentSymbolId,
-                    }),
-                )
-                initPromises.push(promise)
-            } else {
+    init(initPromises: Promise<any>[] = []) {
+        // Call init if its a primitive symbol
+        if (this.leafSymbolMap[this.symbolDef.id]) {
+            initPromises.push(
+                this.leafSymbolMap[this.symbolDef.id].instance.init(this),
+            )
+        } else {
+            // Init all child symbols
+            Object.values(this.symbolDef.children.symbols).forEach((symbolDef) => {
                 new FRunnable({
-                    dsl: { symbols: symbol.children.symbols },
+                    symbolDef,
                     leafSymbolMap: this.leafSymbolMap,
-                    symbolId: symbol.id,
                     parent: this,
-                    parentSymbolId: this.symbolId,
                 }).init(initPromises)
-            }
-        })
+            })
+        }
 
-        return initPromises
+        return Promise.all(initPromises)
     }
 }
 
@@ -176,11 +169,33 @@ export class FProgram {
     dsl: FunctionalProgramDsl
     leafSymbols: Record<string, LeafSymbolDef>
     stopped: boolean
+    rootNodeId: string
+    runnable: FRunnable
 
-    constructor({ dsl }: FProgramInitArgs) {
+    constructor({ dsl, rootNodeId }: FProgramInitArgs) {
         this.dsl = dsl
         this.leafSymbols = {}
+        this.rootNodeId = rootNodeId
         this.stopped = false
+
+        const symbolId = getSmallRandomId()
+        const baseSymbol = {
+            id: symbolId,
+            label: 'lambda',
+            type: 'lambda',
+            inputs: {},
+            outputs: {},
+            children: {
+                in: [[]],
+                out: [this.rootNodeId],
+                symbols: this.dsl.symbols,
+            },
+        }
+
+        this.runnable = new FRunnable({
+            leafSymbolMap: this.leafSymbols,
+            symbolDef: baseSymbol,
+        })
     }
 
     private async importSymbolType(type: string) {
@@ -199,7 +214,8 @@ export class FProgram {
         } else if (isUrl(type)) {
             return await import(type)
         } else {
-            return await import(`https://deno.land/x/${type}.ts`)
+            // return await import(`https://deno.land/x/${type}.ts`)
+            return await import(type)
         }
     }
 
@@ -222,6 +238,13 @@ export class FProgram {
 
     async deploy(runtime?: Runtime) {
         await this.getLeafSymbols(this.dsl.symbols, runtime)
+        this.runnable.leafSymbolMap = this.leafSymbols
         this.stopped = false
+
+        await this.runnable.init()
+    }
+
+    async run(args?: any) {
+        return await this.runnable.run(args)
     }
 }

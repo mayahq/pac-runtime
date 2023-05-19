@@ -34,7 +34,7 @@ export type FunctionalSymbolInput = {
     type: PrimitiveType
     symbolId?: string
     inputPortName?: string
-    value: string | number | boolean | object
+    value: string | number | boolean | Record<string, any>
 }
 
 export type FunctionalSymbolOutput = {
