@@ -1,15 +1,22 @@
 import { assertEquals } from '../../test_deps.ts'
 import { LocalStorage } from '../../src/storage/local.ts'
 import { stdpath } from '../../test_deps.ts'
-import { Symbol } from '../../src/program/program.d.ts'
+import { FunctionalSymbolDsl } from '../../src/program/program.d.ts'
 
 const __dirname = new URL(import.meta.url).pathname
 
-const testSymbol: Symbol = {
+const emptyChildren = {
+    in: [[]],
+    out: [],
+    symbols: [],
+}
+const testSymbol: FunctionalSymbolDsl = {
     id: '123',
-    name: 'http',
+    label: 'http',
     type: 'http',
-    wires: [[]],
+    inputs: {},
+    outputs: {},
+    children: emptyChildren,
 }
 
 Deno.test('Local storage for programs', async (t) => {
