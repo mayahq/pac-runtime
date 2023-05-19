@@ -1,6 +1,7 @@
-import { ProgramDSL } from '../program/program.ts'
+import { FunctionalProgramDsl } from '../program/program.d.ts'
+// import { ProgramDSL } from '../program/program.ts'
 
 export interface Storage {
-    get: (workerId: string) => Promise<ProgramDSL>
-    set: (workerId: string, prog: ProgramDSL) => Promise<void>
+    get: (workerId: string) => Promise<FunctionalProgramDsl>
+    set: (workerId: string, prog: FunctionalProgramDsl) => Promise<void>
 }

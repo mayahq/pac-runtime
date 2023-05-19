@@ -39,9 +39,9 @@ class Symbol implements SymbolImpl {
     static description = ''
 
     readonly id: string = getSmallRandomId()
-    readonly properties: {
-        [fieldName: string]: PropertyObject
-    }
+    // readonly properties: {
+    //     [fieldName: string]: PropertyObject
+    // }
     children?: Children = {
         wires: {
             in: [[]],
@@ -81,14 +81,6 @@ class Symbol implements SymbolImpl {
         }
         if (args.metadata) {
             this.metadata = args.metadata
-        }
-        if (args.properties) {
-            this.properties = args.properties
-        } else {
-            this.properties = this.evaluateSymbolProperties(this, {})
-        }
-        if (args.wires) {
-            this.wires = args.wires
         }
     }
 
@@ -142,20 +134,6 @@ class Symbol implements SymbolImpl {
         return evaluated
     }
 
-    private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
-        const { name, type } = this.getSelfProperties()
-        const evaluated: { [propName: string]: PropertyObject } = {}
-        Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
-            try {
-                evaluated[property] = propVal.evaluateField(symbol, property, msg)
-            } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
-                throw error
-            }
-        })
-        return evaluated
-    }
-
     toJSON(): string {
         const { type, isConfig, description } = this.getSelfProperties()
         const out: SymbolDsl = {
@@ -163,7 +141,7 @@ class Symbol implements SymbolImpl {
             type: type,
             isConfig: isConfig,
             description: description,
-            properties: this.properties,
+            // properties: this.properties,
             schema: {
                 editorProperties: this.getSelfSchema().editorProperties,
                 inputSchema: this.getSelfSchema().inputSchema,

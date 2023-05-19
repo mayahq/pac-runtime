@@ -4,6 +4,7 @@ import { AsyncLock } from '../../test_deps.ts'
 import { FunctionalProgramDsl } from '../../src/program/program.d.ts'
 
 const functionType = '/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts'
+// const functionType = 'gh:mayahq/stdlib/function'
 const emptyChildren = {
     in: [[]],
     out: [],
@@ -74,6 +75,6 @@ Deno.test('Functional paradigm program execution', async (t) => {
         await program.deploy()
         const result = await program.run()
 
-        console.log('result', result)
+        assertEquals(result.output, 4)
     })
 })

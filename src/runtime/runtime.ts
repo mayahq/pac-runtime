@@ -1,5 +1,5 @@
 import { Application, Router, RouterContext } from '../../deps.ts'
-import { Program, ProgramDSL } from '../program/program.ts'
+import { FProgram } from '../program/functional.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
@@ -8,6 +8,7 @@ import { getAxiosInstance } from './axios.ts'
 import { ExecutionStatus, RuntimeInterface, SymbolMethods } from './runtime.d.ts'
 import { match, MatchFunction, pathToRegexp } from '../../deps.ts'
 import { RemoteStorage } from '../storage/remote.ts'
+import { FunctionalProgramDsl } from '../program/program.d.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
 
@@ -26,7 +27,7 @@ type RuntimeInitArgs = {
 }
 
 type DeployArgs = {
-    dsl: ProgramDSL
+    dsl: FunctionalProgramDsl
     saveToStorage?: boolean
 }
 
@@ -84,7 +85,7 @@ export class Runtime implements RuntimeInterface {
     comms: Comms
     functions: SymbolMethods
     storage: Storage
-    program: Program | null
+    program: FProgram | null
     axiosInstance: AxiosInstance
     dynamicRoutes: DynamicRoute[]
 
@@ -169,7 +170,7 @@ export class Runtime implements RuntimeInterface {
 
     async deploy({ dsl, saveToStorage = true }: DeployArgs) {
         this.program?.stop()
-        const program = new Program({ dsl })
+        const program = new FProgram({ dsl, rootNodeId: '' })
         this.dynamicRoutes = []
 
         // Re-create the dynamic router

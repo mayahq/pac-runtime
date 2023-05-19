@@ -95,7 +95,8 @@ export class FRunnable {
                                 })
                                 const result = await runnable.run(args)
                                 this.symbolFieldVals[field.symbolId] = result
-                                return _.get(result, field.value)
+                                const final = _.get(result, field.value)
+                                return done(null, final)
                             }
                         }, (e: Error | null, r: unknown) => {
                             if (e) {
@@ -117,6 +118,7 @@ export class FRunnable {
     }
 
     async run(args?: Record<string, any>): Promise<any> {
+        // console.log('running node', this.symbolDef.id)
         /**
          * Execute the symbol if its a leaf symbol
          */
@@ -203,11 +205,20 @@ export class FProgram {
             // gh:mayahq/stdlib/http
             const location = type.replace('gh:', '').trim()
             const locationParts = location.split('/')
-            if (locationParts.length !== 3) {
+            if (![3, 4].includes(locationParts.length)) {
                 throw new Error(`Invalid github type path: ${type}`)
             }
-            const [user, repo, symbolName]: string[] = locationParts
-            return await import(`https://raw.githubusercontent.com/${user}/${repo}/${symbolName}/${symbolName}.ts`)
+            if (locationParts.length === 3) {
+                const [user, repo, symbolName]: string[] = locationParts
+                return await import(
+                    `https://raw.githubusercontent.com/${user}/${repo}/main/symbols/${symbolName}/${symbolName}.ts`
+                )
+            } else {
+                const [user, repo, branch, symbolName]: string[] = locationParts
+                return await import(
+                    `https://raw.githubusercontent.com/${user}/${repo}/${branch}/symbols/${symbolName}/${symbolName}.ts`
+                )
+            }
         } else if (type.startsWith('ghPath')) {
             const location = type.replace('ghPath:', '').trim()
             return await import(`https://raw.githubusercontent.com/${location}.ts`)
@@ -245,6 +256,9 @@ export class FProgram {
     }
 
     async run(args?: any) {
-        return await this.runnable.run(args)
+        return (await this.runnable.run(args))[0]
+    }
+
+    stop() {
     }
 }

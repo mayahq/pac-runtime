@@ -79,34 +79,34 @@ class TypedInput extends Fields {
             type: 'str',
             value: '',
         }
-        switch (symbol.properties[propertyName].type) {
-            case 'str':
-            case 'num':
-            case 'bool':
-            case 'date':
-            case 're':
-            case 'password':
-            case 'bin':
-            case 'json':
-            case 'jsonata':
-            case 'config': {
-                evaluated.type = this.type
-                evaluated.value = symbol.properties[propertyName]
-                break
-            }
-            case 'global': {
-                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
-                evaluated.type = this.type
-                // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
-                break
-            }
-            case 'msg': {
-                const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
-                evaluated.type = this.type
-                evaluated.value = lodash.get(msg, keyDepth)
-                break
-            }
-        }
+        // switch (symbol.properties[propertyName].type) {
+        //     case 'str':
+        //     case 'num':
+        //     case 'bool':
+        //     case 'date':
+        //     case 're':
+        //     case 'password':
+        //     case 'bin':
+        //     case 'json':
+        //     case 'jsonata':
+        //     case 'config': {
+        //         evaluated.type = this.type
+        //         evaluated.value = symbol.properties[propertyName]
+        //         break
+        //     }
+        //     case 'global': {
+        //         const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
+        //         evaluated.type = this.type
+        //         // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
+        //         break
+        //     }
+        //     case 'msg': {
+        //         const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
+        //         evaluated.type = this.type
+        //         evaluated.value = lodash.get(msg, keyDepth)
+        //         break
+        //     }
+        // }
         return evaluated
     }
 
