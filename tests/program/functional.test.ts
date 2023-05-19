@@ -1,6 +1,5 @@
 import { assertEquals } from '../../test_deps.ts'
 import { FProgram } from '../../src/program/functional.ts'
-import { AsyncLock } from '../../test_deps.ts'
 import { FunctionalProgramDsl } from '../../src/program/program.d.ts'
 
 const functionType = '/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts'
