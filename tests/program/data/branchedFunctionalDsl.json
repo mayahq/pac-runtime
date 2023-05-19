@@ -1,0 +1,69 @@
+{
+	"symbols": [
+		{
+			"id": "f1",
+			"label": "f1",
+			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"inputs": {
+				"body": {
+					"type": "string",
+					"value": "return { output: 1, function: `return { output: input * 3 }` };"
+				},
+				"input": {
+					"type": "string",
+					"value": "bruh"
+				}
+			},
+			"outputs": {},
+			"children": {
+				"in": [[]],
+				"out": [],
+				"symbols": []
+			}
+		},
+		{
+			"id": "f2",
+			"label": "f2",
+			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"inputs": {
+				"body": {
+					"type": "string",
+					"value": "return { output: 2 }"
+				},
+				"input": {
+					"type": "string",
+					"value": "bruh"
+				}
+			},
+			"outputs": {},
+			"children": {
+				"in": [[]],
+				"out": [],
+				"symbols": []
+			}
+		},
+		{
+			"id": "f3",
+			"label": "f3",
+			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"inputs": {
+				"body": {
+					"type": "symbol",
+					"symbolId": "f1",
+					"value": "function"
+				},
+				"input": {
+					"type": "symbol",
+					"symbolId": "f2",
+					"value": "output"
+				}
+			},
+			"outputs": {},
+			"children": {
+				"in": [[]],
+				"out": [],
+				"symbols": []
+			}
+		}
+	]
+}
