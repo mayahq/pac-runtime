@@ -3,7 +3,7 @@
 		{
 			"id": "f1",
 			"label": "f1",
-			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"type": "mayalabs_stdlib@0.0.5/function",
 			"inputs": {
 				"body": {
 					"type": "string",
@@ -24,7 +24,7 @@
 		{
 			"id": "f2",
 			"label": "f2",
-			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"type": "mayalabs_stdlib@0.0.5/function",
 			"inputs": {
 				"body": {
 					"type": "string",
@@ -46,7 +46,7 @@
 		{
 			"id": "f3",
 			"label": "f3",
-			"type": "/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+			"type": "mayalabs_stdlib@0.0.5/function",
 			"inputs": {
 				"body": {
 					"type": "string",

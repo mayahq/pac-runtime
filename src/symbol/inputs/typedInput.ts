@@ -1,4 +1,3 @@
-import { lodash } from '../../../deps.ts'
 import Symbol from '../symbol.ts'
 import {
     ComponentTypes,
@@ -76,7 +75,7 @@ class TypedInput extends Fields {
         }
     }
 
-    evaluateField(symbol: Symbol, propertyName: string, msg: Record<string, unknown>): PropertyObject {
+    evaluateField(_symbol: Symbol, _propertyName: string, _msg: Record<string, unknown>): PropertyObject {
         const evaluated: PropertyObject = {
             type: 'str',
             value: '',

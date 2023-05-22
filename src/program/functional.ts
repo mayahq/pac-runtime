@@ -222,11 +222,16 @@ export class FProgram {
         } else if (type.startsWith('ghPath')) {
             const location = type.replace('ghPath:', '').trim()
             return await import(`https://raw.githubusercontent.com/${location}.ts`)
-        } else if (isUrl(type)) {
+        } else if (isUrl(type) || type.startsWith('File://')) {
             return await import(type)
         } else {
-            // return await import(`https://deno.land/x/${type}.ts`)
-            return await import(type)
+            const parts = type.split('/')
+            if (parts.length === 2) {
+                return await import(`https://deno.land/x/${parts[0]}/symbols/${parts[1]}/${parts[1]}.ts`)
+            } else {
+                return await import(`https://deno.land/x/${type}.ts`)
+            }
+            // return await import(type)
         }
     }
 
