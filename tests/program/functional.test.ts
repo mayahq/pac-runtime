@@ -3,13 +3,6 @@ import { FProgram } from '../../src/program/functional.ts'
 import { FunctionalProgramDsl } from '../../src/program/program.d.ts'
 import { stdpath } from '../../deps.ts'
 
-const functionType = '/Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts'
-const emptyChildren = {
-    in: [[]],
-    out: [],
-    symbols: [],
-}
-
 const __dirname = new URL(import.meta.url).pathname
 
 Deno.test('Functional paradigm program execution', async (t) => {
