@@ -24,6 +24,7 @@ type RuntimeInitArgs = {
     environment: string
     autoShutdownBehaviour: AutoShutdownBehaviour
     maxIdleTime: number
+    storage?: Storage
 }
 
 type DeployArgs = {
@@ -115,6 +116,10 @@ export class Runtime implements RuntimeInterface {
         this.storage = new RemoteStorage({
             runtime: this,
         })
+
+        if (props.storage) {
+            this.storage = props.storage
+        }
     }
 
     get appBackendBaseUrl() {

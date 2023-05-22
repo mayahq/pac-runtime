@@ -1,15 +1,4 @@
-import type {
-    Children,
-    Metadata,
-    OnMessageCallback,
-    Property,
-    PropertyObject,
-    Schema,
-    SymbolDsl,
-    SymbolImpl,
-    TypedMetadata,
-    Wires,
-} from './symbol.d.ts'
+import type { Children, Metadata, Property, Schema, SymbolDsl, SymbolImpl, TypedMetadata, Wires } from './symbol.d.ts'
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
@@ -101,6 +90,7 @@ class Symbol implements SymbolImpl {
     async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
         await this.call(runner, args)
     }
+
     async init(_runner: FRunnable): Promise<void> {
         // Left for the symbol developer to override
     }
@@ -108,7 +98,7 @@ class Symbol implements SymbolImpl {
     async call(
         _runner: FRunnable,
         _args: Record<string, unknown>,
-    ): Promise<void> {
+    ): Promise<any> {
         // Left for the symbol developer to override
     }
 
