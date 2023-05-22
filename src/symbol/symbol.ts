@@ -1,18 +1,8 @@
-import type {
-    Children,
-    Metadata,
-    OnMessageCallback,
-    Property,
-    PropertyObject,
-    Schema,
-    SymbolDsl,
-    SymbolImpl,
-    TypedMetadata,
-    Wires,
-} from './symbol.d.ts'
+import type { Children, Metadata, Property, Schema, SymbolDsl, SymbolImpl, TypedMetadata, Wires } from './symbol.d.ts'
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
+import { FRunnable } from '../program/functional.ts'
 
 type SelfProperties = {
     name: string
@@ -38,9 +28,9 @@ class Symbol implements SymbolImpl {
     static description = ''
 
     readonly id: string = getSmallRandomId()
-    readonly properties: {
-        [fieldName: string]: PropertyObject
-    }
+    // readonly properties: {
+    //     [fieldName: string]: PropertyObject
+    // }
     children?: Children = {
         wires: {
             in: [[]],
@@ -81,14 +71,6 @@ class Symbol implements SymbolImpl {
         if (args.metadata) {
             this.metadata = args.metadata
         }
-        if (args.properties) {
-            this.properties = args.properties
-        } else {
-            this.properties = this.evaluateSymbolProperties(this, {})
-        }
-        if (args.wires) {
-            this.wires = args.wires
-        }
     }
 
     getSelfSchema(): Schema {
@@ -105,21 +87,19 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    async _runtimeMessageHandler(msg: Record<string, unknown>, callback: OnMessageCallback): Promise<void> {
-        const vals: { [propName: string]: unknown } = {}
-        Object.entries(this.evaluateSymbolProperties(this, msg)).forEach(([prop, propObj]) => {
-            vals[prop] = propObj.value
-        })
-        await this.onMessage(msg, vals, callback)
-    }
-    async onInit(_callback: OnMessageCallback): Promise<void> {
+    async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
+        await this.call(runner, args)
     }
 
-    async onMessage(
-        _msg: Record<string, any>,
-        _vals: Record<string, any>,
-        _callback: OnMessageCallback,
-    ): Promise<void> {
+    async init(_runner: FRunnable): Promise<void> {
+        // Left for the symbol developer to override
+    }
+
+    async call(
+        _runner: FRunnable,
+        _args: Record<string, unknown>,
+    ): Promise<any> {
+        // Left for the symbol developer to override
     }
 
     private generateDslSchema(symbol: Symbol): { [name: string]: TypedMetadata } {
@@ -144,20 +124,6 @@ class Symbol implements SymbolImpl {
         return evaluated
     }
 
-    private evaluateSymbolProperties(symbol: Symbol, msg: Record<string, unknown>) {
-        const { name, type } = this.getSelfProperties()
-        const evaluated: { [propName: string]: PropertyObject } = {}
-        Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
-            try {
-                evaluated[property] = propVal.evaluateField(symbol, property, msg)
-            } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
-                throw error
-            }
-        })
-        return evaluated
-    }
-
     toJSON(): string {
         const { type, isConfig, description } = this.getSelfProperties()
         const out: SymbolDsl = {
@@ -165,7 +131,7 @@ class Symbol implements SymbolImpl {
             type: type,
             isConfig: isConfig,
             description: description,
-            properties: this.properties,
+            // properties: this.properties,
             schema: {
                 editorProperties: this.getSelfSchema().editorProperties,
                 inputSchema: this.getSelfSchema().inputSchema,

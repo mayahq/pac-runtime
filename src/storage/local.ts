@@ -1,6 +1,7 @@
 import { stdpath } from '../../deps.ts'
 import { Storage } from './typings.d.ts'
-import { ProgramDSL } from '../program/program.ts'
+// import { ProgramDSL } from '../program/program.ts'
+import { FunctionalProgramDsl } from '../program/program.d.ts'
 
 type LocalStorageInitArgs = {
     basePath: string
@@ -29,7 +30,7 @@ export class LocalStorage implements Storage {
         }
     }
 
-    async set(workerId: string, prog: ProgramDSL) {
+    async set(workerId: string, prog: FunctionalProgramDsl) {
         await Deno.writeTextFile(
             stdpath.join(this.basePath, `${workerId}.json`),
             JSON.stringify(prog),

@@ -16,9 +16,9 @@ type PropertyObject = {
 export type PrimitiveTypes = 'str' | 'num' | 'bool'
 
 export type TypedInputTypes =
-    | 'str'
-    | 'num'
-    | 'bool'
+    | 'string'
+    | 'number'
+    | 'boolean'
     | 'json'
     | 'date'
     | 'msg'
@@ -28,6 +28,8 @@ export type TypedInputTypes =
     | 'password'
     | 'bin'
     | 'config'
+    | 'lambda_input'
+    | 'symbol'
 
 export type ComponentTypes =
     | 'input'

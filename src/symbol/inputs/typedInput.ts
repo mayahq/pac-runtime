@@ -13,10 +13,10 @@ import Fields from './field.ts'
 
 class TypedInput extends Fields {
     value: ValueType = ''
-    type: TypedInputTypes = 'str'
+    type: TypedInputTypes = 'string'
     label?: string
     component?: ComponentTypes = 'input'
-    allowedTypes?: ListInputTypes = ['str', 'msg', 'global']
+    allowedTypes?: ListInputTypes = ['string', 'msg', 'global']
     allowInput?: boolean = true
     width?: string
     placeholder?: string
@@ -32,9 +32,9 @@ class TypedInput extends Fields {
             this.value = input.defaultValue
         }
         switch (input.type) {
-            case 'str':
-            case 'num':
-            case 'bool':
+            case 'string':
+            case 'number':
+            case 'boolean':
             case 'date':
             case 're':
             case 'msg':
@@ -81,34 +81,34 @@ class TypedInput extends Fields {
             type: 'str',
             value: '',
         }
-        switch (symbol.properties[propertyName].type) {
-            case 'str':
-            case 'num':
-            case 'bool':
-            case 'date':
-            case 're':
-            case 'password':
-            case 'bin':
-            case 'json':
-            case 'jsonata':
-            case 'config': {
-                evaluated.type = symbol.properties[propertyName].type
-                evaluated.value = symbol.properties[propertyName].value
-                break
-            }
-            case 'global': {
-                const keyDepth: string = symbol.properties[propertyName].value?.toString() || ''
-                evaluated.type = symbol.properties[propertyName].type
-                // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
-                break
-            }
-            case 'msg': {
-                // const keyDepth: string = symbol.properties[propertyName].value?.toString() || ''
-                evaluated.type = symbol.properties[propertyName].type
-                evaluated.value = lodash.get(msg, symbol.properties[propertyName].value)
-                break
-            }
-        }
+        // switch (symbol.properties[propertyName].type) {
+        //     case 'str':
+        //     case 'num':
+        //     case 'bool':
+        //     case 'date':
+        //     case 're':
+        //     case 'password':
+        //     case 'bin':
+        //     case 'json':
+        //     case 'jsonata':
+        //     case 'config': {
+        //         evaluated.type = this.type
+        //         evaluated.value = symbol.properties[propertyName]
+        //         break
+        //     }
+        //     case 'global': {
+        //         const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
+        //         evaluated.type = this.type
+        //         // evaluated.value = lodash.get(symbol.runtime!["storage"]!["internal"], keyDepth);
+        //         break
+        //     }
+        //     case 'msg': {
+        //         const keyDepth: string[] = (symbol.properties[propertyName]?.toString() || '').split('.') || []
+        //         evaluated.type = this.type
+        //         evaluated.value = lodash.get(msg, keyDepth)
+        //         break
+        //     }
+        // }
         return evaluated
     }
 
