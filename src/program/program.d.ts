@@ -48,8 +48,8 @@ export type FunctionalSymbolDsl = {
     type: string
     inputs: Record<string, FunctionalSymbolInput>
     outputs: Record<string, FunctionalSymbolOutput>
-    children: {
-        in?: { symbol: string; port: number }[][]
+    children?: {
+        // in?: { symbol: string; port: number }[][]
         out: string[]
         symbols: FunctionalSymbolDsl[]
     }

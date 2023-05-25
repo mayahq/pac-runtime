@@ -13,3 +13,12 @@ export function getEnvVariableOrCrash(varname: string, defaultVal?: string): str
 
     return val
 }
+
+export function isUrl(url: string) {
+    try {
+        new URL(url)
+        return true
+    } catch (_) {
+        return false
+    }
+}

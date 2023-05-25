@@ -82,7 +82,7 @@ export class FRunnable {
                             if (this.symbolFieldVals[field.symbolId]) {
                                 return done(null, _.get(this.symbolFieldVals[field.symbolId], field.value))
                             } else {
-                                const nextSymbolDef = this.parent!.symbolDef.children.symbols.find((s) =>
+                                const nextSymbolDef = this.parent!.symbolDef!.children!.symbols.find((s) =>
                                     s.id === field.symbolId
                                 )
                                 if (!nextSymbolDef) {
@@ -130,8 +130,8 @@ export class FRunnable {
          * This is a lambda. Execute it with a
          */
         const outputChildren: FunctionalSymbolDsl[] = []
-        this.symbolDef.children.symbols.forEach((s) => {
-            if (this.symbolDef.children.out.includes(s.id)) {
+        this.symbolDef!.children!.symbols.forEach((s) => {
+            if (this.symbolDef!.children!.out.includes(s.id)) {
                 outputChildren.push(s)
             }
         })
@@ -154,7 +154,7 @@ export class FRunnable {
             )
         } else {
             // Init all child symbols
-            Object.values(this.symbolDef.children.symbols).forEach((symbolDef) => {
+            Object.values(this.symbolDef!.children!.symbols).forEach((symbolDef) => {
                 new FRunnable({
                     symbolDef,
                     leafSymbolMap: this.leafSymbolMap,
