@@ -16,6 +16,7 @@ type PropertyObject = {
 export type PrimitiveTypes = 'str' | 'num' | 'bool'
 
 export type TypedInputTypes =
+    | 'pulse'
     | 'string'
     | 'number'
     | 'boolean'
@@ -30,6 +31,7 @@ export type TypedInputTypes =
     | 'config'
     | 'lambda_input'
     | 'symbol'
+    | 'procedure'
 
 export type ComponentTypes =
     | 'input'

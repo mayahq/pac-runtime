@@ -1,12 +1,12 @@
 import { ProcedureDsl, ProgramDsl } from './hybrid.d.ts'
 
-type PortMap = Record<string, Record<string, string[]>>
+export type PortMap = Record<string, Record<string, string[]>>
 
 function isLeafProc(proc: ProcedureDsl): boolean {
     return !proc.children
 }
 
-function getAllProcedures(procs: ProcedureDsl[], res: Record<string, ProcedureDsl> = {}) {
+export function getAllProcedures(procs: ProcedureDsl[], res: Record<string, ProcedureDsl> = {}) {
     for (const proc of procs) {
         res[proc.id] = proc
         if (!isLeafProc(proc)) {
@@ -16,21 +16,23 @@ function getAllProcedures(procs: ProcedureDsl[], res: Record<string, ProcedureDs
     return res
 }
 
-function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]> = {}, soFar: string[] = []) {
+export function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]> = {}) {
+    const res: string[] = []
     if (cache[proc.id]) {
         return cache[proc.id]
     }
 
     if (isLeafProc(proc)) {
-        soFar.push(proc.id)
+        res.push(proc.id)
     } else {
         for (const procId of proc.children!.pulseIn) {
-            getLeafInputs(proc.children!.procedures[procId], cache, soFar)
+            const inputsForProcId = getLeafInputs(proc.children!.procedures[procId], cache)
+            cache[procId] = inputsForProcId
+            res.push(...inputsForProcId)
         }
     }
 
-    cache[proc.id] = soFar
-    return soFar
+    return res
 }
 
 export function createOutInMap(
@@ -73,11 +75,10 @@ export function createOutInMap(
     return soFar
 }
 
-export function createLeafInputMap(program: ProgramDsl) {
+export function createLeafInputMap(program: ProgramDsl): PortMap {
     const topLevelProcList = Object.values(program.procedures)
     const outInMap = createOutInMap(topLevelProcList)
     const allProcedures = getAllProcedures(topLevelProcList)
-    console.log('allProcs', allProcedures)
 
     const cache = {}
     const result: PortMap = {}
@@ -99,3 +100,51 @@ export function createLeafInputMap(program: ProgramDsl) {
 
     return result
 }
+
+export function createDepthMap(
+    procs: ProcedureDsl[],
+    soFar: string[] = [],
+    result: Record<string, string[]> = {},
+) {
+    for (const proc of procs) {
+        const newSoFar = soFar.concat(proc.id)
+        result[proc.id] = newSoFar
+        if (proc.children) {
+            createDepthMap(Object.values(proc.children.procedures), newSoFar, result)
+        }
+    }
+
+    return result
+}
+
+export function createParentMap(
+    procs: ProcedureDsl[],
+    result: Record<string, string> = {},
+    current = '',
+) {
+    for (const proc of procs) {
+        if (!proc.children) {
+            result[proc.id] = current
+        } else {
+            createParentMap(
+                Object.values(proc.children.procedures),
+                result,
+                proc.id,
+            )
+        }
+    }
+
+    return result
+}
+
+// proc 3 output1
+// input: 4
+// leafInputs: [ "3", "7" ]
+
+// proc 3 output1
+// input: 5
+// leafInputs: [ "5" ]
+
+// proc 3 output2
+// input: 6
+// leafInputs: [ "6" ]

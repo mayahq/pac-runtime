@@ -58,3 +58,5 @@ export type ProcedureDsl = {
 export type ProgramDsl = {
     procedures: Record<string, ProcedureDsl>
 }
+
+export type RunnableCallback = (val: any, portName?: string) => void

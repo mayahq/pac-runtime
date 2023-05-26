@@ -3,6 +3,8 @@ import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
 import { FRunnable } from '../program/functional.ts'
+import { Runnable } from '../program/hybrid.ts'
+import { RunnableCallback } from '../program/hybrid.d.ts'
 
 type SelfProperties = {
     name: string
@@ -87,17 +89,31 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
-        await this.call(runner, args)
-    }
+    // async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
+    //     await this.call(runner, args)
+    // }
 
-    async init(_runner: FRunnable): Promise<void> {
+    async init(_runner: Runnable, _sender: RunnableCallback): Promise<void> {
         // Left for the symbol developer to override
     }
 
+    async _call(
+        _runner: Runnable,
+        _callback: RunnableCallback,
+        _pulse?: Record<string, any>,
+    ) {
+        const schema = this.getSelfSchema()
+        const vals: Record<string, any> = {}
+        for (const propertyName in schema.propertiesSchema) {
+            vals[propertyName] = await _runner.evaluateProperty(propertyName, _pulse)
+        }
+        this.call(vals, _callback, _pulse)
+    }
+
     async call(
-        _runner: FRunnable,
-        _args: Record<string, unknown>,
+        _vals: Record<string, any>,
+        _callback: RunnableCallback,
+        _pulse?: Record<string, any>,
     ): Promise<any> {
         // Left for the symbol developer to override
     }
