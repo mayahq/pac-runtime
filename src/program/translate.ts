@@ -2,20 +2,35 @@ import { ProcedureDsl, ProgramDsl } from './hybrid.d.ts'
 
 export type PortMap = Record<string, Record<string, string[]>>
 
-function isLeafProc(proc: ProcedureDsl): boolean {
+/**
+ * @param proc An individual procedure's DSL
+ * @returns `true` if the procedure is a leaf procedure, `false` otherwise.
+ */
+export function isLeafProc(proc: ProcedureDsl): boolean {
     return !proc.children
 }
 
-export function getAllProcedures(procs: ProcedureDsl[], res: Record<string, ProcedureDsl> = {}) {
+/**
+ * @param procs List of procedures - these can have child procedures of their own
+ * @param _res Accumulator - you don't need to pass this
+ * @returns A map of procedures to their IDs.
+ */
+export function getAllProcedures(procs: ProcedureDsl[], _res: Record<string, ProcedureDsl> = {}) {
     for (const proc of procs) {
-        res[proc.id] = proc
+        _res[proc.id] = proc
         if (!isLeafProc(proc)) {
-            getAllProcedures(Object.values(proc.children!.procedures), res)
+            getAllProcedures(Object.values(proc.children!.procedures), _res)
         }
     }
-    return res
+    return _res
 }
 
+/**
+ * @param proc The procedure in question
+ * @param cache Cache to use
+ * @returns The list of IDs of leaf procedures that would receive the pulse,
+ *          should the pulse be sent to this procedure
+ */
 export function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]> = {}) {
     const res: string[] = []
     if (cache[proc.id]) {
@@ -35,6 +50,13 @@ export function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]
     return res
 }
 
+/**
+ * @param procs List of procedures
+ * @param parent The parent that contains `procs` as children. Can be null.
+ * @param soFar Accumulator for results. You don't need to pass this
+ * @returns A map specifying which procedure's which output port connects to which
+ * procedures' input ports
+ */
 export function createOutInMap(
     procs: ProcedureDsl[],
     parent: ProcedureDsl | null = null,
@@ -75,6 +97,12 @@ export function createOutInMap(
     return soFar
 }
 
+/**
+ * @param program The program DSL
+ * @returns A map specifying which procedure's which port is directly or indirectly connected to
+ * which leaf procedure inputs.
+ * `{ procId: { portName1: ['procId1', 'procId2'] } }`
+ */
 export function createLeafInputMap(program: ProgramDsl): PortMap {
     const topLevelProcList = Object.values(program.procedures)
     const outInMap = createOutInMap(topLevelProcList)
@@ -101,50 +129,27 @@ export function createLeafInputMap(program: ProgramDsl): PortMap {
     return result
 }
 
-export function createDepthMap(
-    procs: ProcedureDsl[],
-    soFar: string[] = [],
-    result: Record<string, string[]> = {},
-) {
-    for (const proc of procs) {
-        const newSoFar = soFar.concat(proc.id)
-        result[proc.id] = newSoFar
-        if (proc.children) {
-            createDepthMap(Object.values(proc.children.procedures), newSoFar, result)
-        }
-    }
-
-    return result
-}
-
+/**
+ * @param procs List of procedures to create parent map for. These procedures can themselves have children.
+ * @param _result Accumulator - you don't need to pass this
+ * @param _current State variable - you don't need to pass this
+ * @returns A map with the procedure ID as the key, and it's parent procedure as the value
+ */
 export function createParentMap(
     procs: ProcedureDsl[],
-    result: Record<string, string> = {},
-    current = '',
+    _result: Record<string, string> = {},
+    _current = '',
 ) {
     for (const proc of procs) {
-        if (!proc.children) {
-            result[proc.id] = current
-        } else {
+        _result[proc.id] = _current
+        if (proc.children) {
             createParentMap(
                 Object.values(proc.children.procedures),
-                result,
+                _result,
                 proc.id,
             )
         }
     }
 
-    return result
+    return _result
 }
-
-// proc 3 output1
-// input: 4
-// leafInputs: [ "3", "7" ]
-
-// proc 3 output1
-// input: 5
-// leafInputs: [ "5" ]
-
-// proc 3 output2
-// input: 6
-// leafInputs: [ "6" ]
