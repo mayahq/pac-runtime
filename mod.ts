@@ -23,10 +23,8 @@ import Field from './src/symbol/inputs/field.ts'
 export { Field }
 
 export { default as Symbol } from './src/symbol/symbol.ts'
-export { FProgram } from './src/program/functional.ts'
 export { Runtime } from './src/runtime/runtime.ts'
 export { LocalStorage } from './src/storage/local.ts'
 export { RemoteStorage } from './src/storage/remote.ts'
-export type { FunctionalProgramDsl, FunctionalSymbolDsl } from './src/program/program.d.ts'
 export type { ProcedureDsl, ProgramDsl } from './src/program/hybrid.d.ts'
 export { Program } from './src/program/hybrid.ts'
