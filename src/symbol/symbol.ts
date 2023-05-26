@@ -2,7 +2,6 @@ import type { Children, Metadata, Property, Schema, SymbolDsl, SymbolImpl, Typed
 import TypedInput from './inputs/typedInput.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
-import { FRunnable } from '../program/functional.ts'
 import { Runnable } from '../program/hybrid.ts'
 import { RunnableCallback } from '../program/hybrid.d.ts'
 
@@ -89,10 +88,6 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    // async _runtimeMessageHandler(runner: FRunnable, args: Record<string, unknown>): Promise<void> {
-    //     await this.call(runner, args)
-    // }
-
     async init(_runner: Runnable, _sender: RunnableCallback): Promise<void> {
         // Left for the symbol developer to override
     }
@@ -160,17 +155,6 @@ class Symbol implements SymbolImpl {
         }
         return JSON.stringify(out, null, 2)
     }
-
-    // static fromJSON(symbolRepr: string, callback?: OnMessageCallback): Symbol {
-    //     const dummy = {}
-    //     try {
-    //         const parsed: SymbolDsl = JSON.parse(symbolRepr)
-    //         const sym: Symbol = new Symbol(callback ? callback : dummy, parsed)
-    //         return sym
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // }
 }
 
 export default Symbol
