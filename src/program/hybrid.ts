@@ -339,8 +339,7 @@ export class Program {
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
-            const { pulse, metadata, destination } = data
-            console.log('pulse data', data)
+            const { pulse, destination } = data
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({
