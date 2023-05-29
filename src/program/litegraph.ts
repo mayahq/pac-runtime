@@ -1,6 +1,6 @@
 import { ProcedureDsl, ProgramDsl } from '../../mod.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
-import { Children } from './hybrid.d.ts'
+import { Children, PrimitiveType } from './hybrid.d.ts'
 
 type LiteGraphNodeOutput = {
     name: string
@@ -52,6 +52,16 @@ export type LiteGraphSpec = {
     version?: number
 }
 
+const primitives: Record<string, boolean> = {
+    json: true,
+    string: true,
+    boolean: true,
+    number: true,
+}
+function isPrimitiveType(input: LiteGraphNodeInput): boolean {
+    return !!primitives[input.type]
+}
+
 function getChildren(lNode: LiteGraphNode): Children | undefined {
     if (!lNode.subgraph) {
         return undefined
@@ -78,6 +88,15 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
             pulseNext: {},
         }
 
+        node.inputs?.forEach((input) => {
+            if (isPrimitiveType(input)) {
+                proc.inputs[input.name] = {
+                    type: input.type as PrimitiveType,
+                    value: input.value as string | number | boolean | JSON,
+                }
+            }
+        })
+
         if (node.subgraph) {
             proc.children = getChildren(node)
         }
@@ -98,22 +117,45 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
         const destProc = children.procedures[destId]
 
         if (sourceNode.type === 'graph/input') {
-            destProc.inputs[destPort.name] = {
-                type: 'lambda_input',
-                portName: sourceNode.properties!.name as string,
-                value: destPort.value as string,
+            if (sourcePort.linkType === 'pulse') {
+                children.pulseIn.push(destId)
+            } else {
+                destProc.inputs[destPort.name] = {
+                    type: 'lambda_input',
+                    portName: sourceNode.properties!.name as string,
+                    value: destPort.value as string,
+                }
             }
         } else if (destNode.type === 'graph/output') {
-            //
-            children.outputs[destNode.properties!.name] = {
-                portName: sourcePort.name,
-                procedureId: sourceId,
+            if (sourcePort.linkType === 'pulse') {
+                if (sourceProc.pulseNext[sourcePort.name]) {
+                    sourceProc.pulseNext[sourcePort.name] = []
+                }
+                sourceProc.pulseNext[sourcePort.name].push({
+                    type: 'lambda_output',
+                    portName: destNode.properties!.name,
+                })
+            } else {
+                children.outputs[destNode.properties!.name] = {
+                    portName: sourcePort.name,
+                    procedureId: sourceId,
+                }
             }
         } else {
-            destProc.inputs[destPort.name] = {
-                id: sourceId,
-                type: 'procedure',
-                value: `${sourcePort.name}.${destPort.value as string}`,
+            if (sourcePort.linkType === 'pulse') {
+                if (sourceProc.pulseNext[sourcePort.name]) {
+                    sourceProc.pulseNext[sourcePort.name] = []
+                }
+                sourceProc.pulseNext[sourcePort.name].push({
+                    type: 'procedure_input',
+                    procedureId: destProc.id,
+                })
+            } else {
+                destProc.inputs[destPort.name] = {
+                    id: sourceId,
+                    type: 'procedure',
+                    value: `${sourcePort.name}.${destPort.value as string}`,
+                }
             }
         }
     }
@@ -124,7 +166,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
 export function getProgramDsl(graph: LiteGraphSpec): ProgramDsl {
     const lNode: LiteGraphNode = {
         id: 0,
-        type: 'baeLambda',
+        type: 'baseLambda',
         subgraph: {
             nodes: graph.nodes,
             links: graph.links,

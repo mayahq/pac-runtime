@@ -9,7 +9,7 @@ type ProcedureRecursiveInput = {
 
 type TypedInput = {
     type: PrimitiveType
-    value: string
+    value: string | boolean | number | JSON
 }
 
 type LambdaInput = {
