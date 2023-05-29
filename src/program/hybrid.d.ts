@@ -3,7 +3,7 @@ type PrimitiveType = 'pulse' | 'flow' | 'global' | 'boolean' | 'number' | 'strin
 type ProcedureRecursiveInput = {
     type: 'procedure'
     id: string
-    portName: string
+    // portName: string
     value: string
 }
 
@@ -43,16 +43,18 @@ type PulseLambdaOutput = {
 
 type PulseOutput = PulseProcedureInput | PulseLambdaOutput
 
+export type Children = {
+    pulseIn: string[] // List of procedures that the input pulse connects to.
+    outputs: Record<string, SubflowOutput> // Map that records (internal_procedure.portname -> lambda.portname).
+    procedures: Record<string, ProcedureDsl>
+}
+
 export type ProcedureDsl = {
     id: string // ID that uniquely identifies the symbol within a program.
     type: string // Type of procedure.
     inputs: Record<string, ProcedureInput> // Map of inputs. These can be extracted from the pulse or can be of type eval.
     pulseNext: Record<string, PulseOutput[]> // Map of list of procedures that the corresponding pulse output connects to.
-    children?: {
-        pulseIn: string[] // List of procedures that the input pulse connects to.
-        outputs: Record<string, SubflowOutput> // Map that records (internal_procedure.portname -> lambda.portname).
-        procedures: Record<string, ProcedureDsl>
-    }
+    children?: Children
 }
 
 export type ProgramDsl = {
