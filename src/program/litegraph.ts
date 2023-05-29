@@ -97,7 +97,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
         const destPort = destNode!.inputs![destPortIdx]
         const destProc = children.procedures[destId]
 
-        if (sourceNode.type === 'graph/output') {
+        if (sourceNode.type === 'graph/input') {
             destProc.inputs[destPort.name] = {
                 type: 'lambda_input',
                 portName: sourceNode.properties!.name as string,
