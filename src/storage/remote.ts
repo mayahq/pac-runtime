@@ -1,4 +1,4 @@
-import { FunctionalProgramDsl } from '../program/program.d.ts'
+import { ProgramDsl } from '../program/hybrid.d.ts'
 // import { ProgramDSL } from '../program/program.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { Storage } from './typings.d.ts'
@@ -16,7 +16,7 @@ export class RemoteStorage implements Storage {
         this.baseUrl = runtime.appBackendBaseUrl
     }
 
-    async get(workerId: string): Promise<FunctionalProgramDsl> {
+    async get(workerId: string): Promise<ProgramDsl> {
         const response = await this.runtime.axiosInstance({
             url: `${this.baseUrl}/v2/worker/program/${workerId}`,
             method: 'get',
@@ -25,7 +25,7 @@ export class RemoteStorage implements Storage {
         return data.program.dsl
     }
 
-    async set(workerId: string, prog: FunctionalProgramDsl) {
+    async set(workerId: string, prog: ProgramDsl) {
         await this.runtime.axiosInstance({
             url: `${this.baseUrl}/v2/worker/program/${workerId}`,
             method: 'put',

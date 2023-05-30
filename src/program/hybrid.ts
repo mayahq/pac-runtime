@@ -143,17 +143,17 @@ export class Runnable {
         return evaluatePropertyFunc(pulse)
     }
 
-    async init(promises: Promise<any>[] = []) {
+    async init(runtime?: Runtime, promises: Promise<any>[] = []) {
         const leafProcDef = this.baseProgram.leafProcedures[this.dsl.id]
         if (leafProcDef) {
-            promises.push(leafProcDef.instance.init(this, this.sender))
+            promises.push(leafProcDef.instance.init(this, this.sender, runtime))
         } else {
             Object.values(this.dsl!.children!.procedures).forEach((procDsl) => {
                 new Runnable({
                     dsl: procDsl,
                     baseProgram: this.baseProgram,
                     parent: this,
-                }).init(promises)
+                }).init(runtime, promises)
             })
         }
 
@@ -313,7 +313,7 @@ export class Program {
         }
     }
 
-    async init() {
+    async init(runtime?: Runtime) {
         const parent: ProcedureDsl = {
             id: 'parent',
             inputs: {},
@@ -329,12 +329,12 @@ export class Program {
             dsl: parent,
             baseProgram: this,
             parent: null,
-        }).init()
+        }).init(runtime)
     }
 
-    async deploy() {
+    async deploy(runtime?: Runtime) {
         await this.getLeafProcedures()
-        await this.init()
+        await this.init(runtime)
 
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent

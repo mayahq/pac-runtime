@@ -88,7 +88,7 @@ class Symbol implements SymbolImpl {
         }
     }
 
-    async init(_runner: Runnable, _sender: RunnableCallback): Promise<void> {
+    async init(_runner: Runnable, _sender: RunnableCallback, _runtime?: Runtime): Promise<void> {
         // Left for the symbol developer to override
     }
 
