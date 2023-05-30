@@ -1,4 +1,4 @@
-import type { ProcedureDsl, ProgramDsl, RunnableCallback } from './hybrid.d.ts'
+import type { EvaluateFieldFunc, ProcedureDsl, ProgramDsl, PulseEventDetail, RunnableCallback } from './hybrid.d.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
@@ -24,16 +24,6 @@ type RunnableInitArgs = {
     baseProgram: Program
 }
 
-type EvaluateFieldFunc = (args?: Record<string, any>, pulse?: Record<string, any>) => any
-
-type PulseEventDetail = {
-    pulse: Record<string, any>
-    metadata: {
-        sender: string
-        timestamp: number
-    }
-    destination: string
-}
 export class Runnable {
     dsl: ProcedureDsl
     parent: Runnable | null
@@ -348,7 +338,6 @@ export class Program {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
             const { pulse, destination } = data
-            console.log('data', data)
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({

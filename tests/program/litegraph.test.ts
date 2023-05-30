@@ -1,5 +1,5 @@
 import { getProgramDsl } from '../../src/program/litegraph.ts'
-import { liteGraphExample, liteGraphWorkingExample } from './data/litegraphDsl.ts'
+import { liteGraphWorkingExample } from './data/litegraphDsl.ts'
 
 Deno.test('LiteGraph to execution DSL conversion', () => {
     const result = getProgramDsl(liteGraphWorkingExample)

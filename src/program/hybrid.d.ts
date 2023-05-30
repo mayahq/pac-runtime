@@ -43,6 +43,17 @@ type PulseLambdaOutput = {
 
 type PulseOutput = PulseProcedureInput | PulseLambdaOutput
 
+export type EvaluateFieldFunc = (args?: Record<string, any>, pulse?: Record<string, any>) => any
+
+export type PulseEventDetail = {
+    pulse: Record<string, any>
+    metadata: {
+        sender: string
+        timestamp: number
+    }
+    destination: string
+}
+
 export type Children = {
     pulseIn: string[] // List of procedures that the input pulse connects to.
     outputs: Record<string, SubflowOutput> // Map that records (internal_procedure.portname -> lambda.portname).

@@ -237,7 +237,7 @@ export const liteGraphWorkingExample: LiteGraphSpec = {
             id: 4,
             type: functionPath,
             inputs: [
-                typedIn('body', 'console.log(`bruh`, input); return { output: { myValue: input * 2 } }'),
+                typedIn('body', 'return { output: { myValue: input * 2 } }'),
                 pulseIn('input', 'output.myValue'),
                 pulse(),
             ],
