@@ -1,8 +1,7 @@
 import { ProcedureDsl, ProgramDsl } from '../../mod.ts'
-import { getSmallRandomId } from '../utils/misc.ts'
 import { Children, PrimitiveType } from './hybrid.d.ts'
 
-type LiteGraphNodeOutput = {
+export type LiteGraphNodeOutput = {
     name: string
     type: string | number
     links?: string | null | number[]
@@ -10,12 +9,13 @@ type LiteGraphNodeOutput = {
     linkType?: string
 }
 
-type LiteGraphNodeInput = {
+export type LiteGraphNodeInput = {
     name: string
     type: string | number
     link: string | null | number
     value?: string
     label?: string
+    linkType?: string
 }
 
 export interface LiteGraphNode {
@@ -94,6 +94,11 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                     type: input.type as PrimitiveType,
                     value: input.value as string | number | boolean | JSON,
                 }
+            } else if (input.type === 'pulse') {
+                proc.inputs[input.name] = {
+                    type: 'pulse',
+                    value: input.value as string,
+                }
             }
         })
 
@@ -117,7 +122,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
         const destProc = children.procedures[destId]
 
         if (sourceNode.type === 'graph/input') {
-            if (sourcePort.linkType === 'pulse') {
+            if (sourcePort.type === 'basepulse') {
                 children.pulseIn.push(destId)
             } else {
                 destProc.inputs[destPort.name] = {
@@ -127,8 +132,8 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else if (destNode.type === 'graph/output') {
-            if (sourcePort.linkType === 'pulse') {
-                if (sourceProc.pulseNext[sourcePort.name]) {
+            if (sourcePort.type === 'basepulse') {
+                if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
                 }
                 sourceProc.pulseNext[sourcePort.name].push({
@@ -142,10 +147,11 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else {
-            if (sourcePort.linkType === 'pulse') {
-                if (sourceProc.pulseNext[sourcePort.name]) {
+            if (sourcePort.type === 'basepulse') {
+                if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
                 }
+
                 sourceProc.pulseNext[sourcePort.name].push({
                     type: 'procedure_input',
                     procedureId: destProc.id,

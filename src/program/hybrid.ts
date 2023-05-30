@@ -4,10 +4,12 @@ import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
 import { createLeafInputMap, createParentMap, getAllProcedures, PortMap } from './translate.ts'
+import { getProgramDsl, LiteGraphSpec } from './litegraph.ts'
 
 // pulse event: pulse::${proc_id}
 
 type ProgramInitArgs = {
+    // dsl: ProgramDsl
     dsl: ProgramDsl
 }
 
@@ -222,15 +224,21 @@ export class Program {
 
     constructor({ dsl }: ProgramInitArgs) {
         this.dsl = dsl
-        this.leafProcedures = {}
-        this.leafInputMap = createLeafInputMap(dsl)
 
-        const procedureList = Object.values(dsl.procedures)
+        this.leafProcedures = {}
+        this.leafInputMap = createLeafInputMap(this.dsl)
+
+        const procedureList = Object.values(this.dsl.procedures)
         this.parentMap = createParentMap(procedureList)
         this.allProcedures = getAllProcedures(procedureList)
 
         this.hub = new EventTarget()
         this.listener = (_) => undefined
+    }
+
+    static from(spec: LiteGraphSpec): Program {
+        const dsl = getProgramDsl(spec)
+        return new Program({ dsl })
     }
 
     getDeepRunnable(procedureId: string): Runnable {
@@ -340,6 +348,7 @@ export class Program {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
             const { pulse, destination } = data
+            console.log('data', data)
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({

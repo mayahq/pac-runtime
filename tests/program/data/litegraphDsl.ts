@@ -1,4 +1,4 @@
-import { LiteGraphSpec } from '../../../src/program/litegraph.ts'
+import { LiteGraphNodeInput, LiteGraphNodeOutput, LiteGraphSpec } from '../../../src/program/litegraph.ts'
 
 export const liteGraphExample: LiteGraphSpec = {
     'last_node_id': 6,
@@ -138,3 +138,120 @@ export const liteGraphExample: LiteGraphSpec = {
     'config': {},
     'version': 0.4,
 }
+
+function typedIn(name: string, value: any): LiteGraphNodeInput {
+    return {
+        name: name,
+        type: typeof value,
+        value: value,
+        link: null,
+    }
+}
+
+function procIn(name: string, value: string): LiteGraphNodeInput {
+    return {
+        name,
+        type: 'procedure',
+        value,
+        link: null,
+    }
+}
+
+function pulseIn(name: string, value: string): LiteGraphNodeInput {
+    return {
+        name,
+        value,
+        type: 'pulse',
+        link: null,
+    }
+}
+
+function pulse(): LiteGraphNodeInput {
+    return {
+        name: 'pulse',
+        type: 'basepulse',
+        link: null,
+    }
+}
+
+function evalOut(name: string): LiteGraphNodeOutput {
+    return {
+        name,
+        type: 'eval',
+        linkType: 'eval',
+    }
+}
+
+function pulseOut(name: string) {
+    return {
+        name,
+        type: 'basepulse',
+        linkType: 'pulse',
+    }
+}
+
+const functionPath = `File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts`
+
+export const liteGraphWorkingExample: LiteGraphSpec = {
+    nodes: [
+        {
+            id: 1,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'return { output: { myValue: 3 } }'),
+                typedIn('input', ''),
+                pulse(),
+            ],
+            outputs: [
+                evalOut('output'),
+                pulseOut('output'),
+            ],
+        },
+        {
+            id: 2,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'return { output: { myValue: input * 6 } }'),
+                procIn('input', 'myValue'),
+                pulse(),
+            ],
+            outputs: [
+                evalOut('output'),
+                pulseOut('output'),
+            ],
+        },
+        {
+            id: 3,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'return { output: { myValue: input * 2 } }'),
+                pulseIn('input', 'myValue'),
+                pulse(),
+            ],
+            outputs: [
+                pulseOut('output'),
+                pulseOut('output'),
+            ],
+        },
+        {
+            id: 4,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'console.log(`bruh`, input); return { output: { myValue: input * 2 } }'),
+                pulseIn('input', 'output.myValue'),
+                pulse(),
+            ],
+            outputs: [
+                evalOut('output'),
+                pulseOut('output'),
+            ],
+        },
+    ],
+    links: [
+        [1, 1, 0, 2, 1, -1],
+        [2, 2, 0, 3, 1, -1],
+        [3, 3, 1, 4, 1, -1],
+    ],
+}
+
+// console.log('heh', JSON.stringify(liteGraphWorkingExample, null, 4))
