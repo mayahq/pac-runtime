@@ -73,3 +73,54 @@ export type ProgramDsl = {
 }
 
 export type RunnableCallback = (val: any, portName?: string) => void
+
+export type LiteGraphNodeOutput = {
+    name: string
+    type: string | number
+    links?: string | null | number[]
+    value?: string | number | boolean | JSON
+    linkType?: string
+}
+
+export type LiteGraphNodeInput = {
+    name: string
+    type: string | number
+    link: string | null | number
+    value?: string
+    label?: string
+    linkType?: string
+}
+
+export interface LiteGraphNode {
+    id: number
+    type: string
+    pos?: number[]
+    size?: Record<string, number> | number[]
+    flags?: any
+    mode?: number
+    outputs?: LiteGraphNodeOutput[]
+    inputs?: LiteGraphNodeInput[]
+    properties?: Record<string, any>
+    subgraph?: LiteGraphSpec
+    boxcolor?: string
+}
+
+/**
+ * links[0]: link ID
+ * links[1]: Origin ID
+ * links[2]: Origin port index
+ * links[3]: Destination ID
+ * links[4]: Destination port index
+ * links[5]: Type (what the fuck is that?)
+ */
+type LiteGraphLinks = (number | string)[][]
+
+export type LiteGraphSpec = {
+    nodes: LiteGraphNode[]
+    links: LiteGraphLinks
+    last_node_id?: number
+    last_link_id?: number
+    groups?: any[]
+    config?: Record<string, any>
+    version?: number
+}

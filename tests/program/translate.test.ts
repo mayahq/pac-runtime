@@ -1,6 +1,11 @@
-import { createLeafInputMap, createOutInMap, createParentMap, getLeafInputs } from '../../src/program/translate.ts'
+import {
+    createLeafInputMap,
+    createOutInMap,
+    createParentMap,
+    getLeafInputs,
+    getProgramDsl,
+} from '../../src/program/translate.ts'
 import { simpleTranslateTestDsl } from './data/translateDsl.ts'
-import { getProgramDsl } from '../../src/program/litegraph.ts'
 import { liteGraphWorkingExample } from './data/litegraphDsl.ts'
 
 import { assertArrayIncludes, assertEquals } from '../../test_deps.ts'

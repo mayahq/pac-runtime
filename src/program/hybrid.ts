@@ -1,10 +1,16 @@
-import type { EvaluateFieldFunc, ProcedureDsl, ProgramDsl, PulseEventDetail, RunnableCallback } from './hybrid.d.ts'
+import type {
+    EvaluateFieldFunc,
+    LiteGraphSpec,
+    ProcedureDsl,
+    ProgramDsl,
+    PulseEventDetail,
+    RunnableCallback,
+} from './hybrid.d.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
-import { createLeafInputMap, createParentMap, getAllProcedures, PortMap } from './translate.ts'
-import { getProgramDsl, LiteGraphSpec } from './litegraph.ts'
+import { createLeafInputMap, createParentMap, getAllProcedures, getProgramDsl, PortMap } from './translate.ts'
 
 // pulse event: pulse::${proc_id}
 

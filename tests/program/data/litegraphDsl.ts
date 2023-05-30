@@ -1,4 +1,4 @@
-import { LiteGraphNodeInput, LiteGraphNodeOutput, LiteGraphSpec } from '../../../src/program/litegraph.ts'
+import { LiteGraphNodeInput, LiteGraphNodeOutput, LiteGraphSpec } from '../../../src/program/hybrid.d.ts'
 
 export const liteGraphExample: LiteGraphSpec = {
     'last_node_id': 6,
