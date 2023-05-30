@@ -1,6 +1,10 @@
 import { createLeafInputMap, createOutInMap, createParentMap, getLeafInputs } from '../../src/program/translate.ts'
 import { simpleTranslateTestDsl } from './data/translateDsl.ts'
+import { getProgramDsl } from '../../src/program/litegraph.ts'
+import { liteGraphWorkingExample } from './data/litegraphDsl.ts'
+
 import { assertArrayIncludes, assertEquals } from '../../test_deps.ts'
+import { ProcedureRecursiveInput, PulseProcedureInput } from '../../src/program/hybrid.d.ts'
 
 Deno.test('Program translation', async (t) => {
     await t.step('Creation of out-in map', async () => {
@@ -46,4 +50,23 @@ Deno.test('Program translation', async (t) => {
         assertEquals(result['7'], '4')
         assertEquals(result['4'], '2')
     })
+})
+
+Deno.test('LiteGraph to execution DSL conversion', async (t) => {
+    await t.step('Simple flat LiteGraph DSL', async () => {
+        const result = getProgramDsl(liteGraphWorkingExample)
+        // All the top-level nodes are present in the final result
+        assertEquals(Object.keys(result.procedures).length, 4)
+
+        // Recursive Eval inputs are translated correctly
+        assertEquals((result.procedures['3'].inputs['input'] as ProcedureRecursiveInput).id, '2')
+
+        // All recursive eval outputs are merged into one and inputs are namespaced correctly
+        assertEquals((result.procedures['3'].inputs['input'] as ProcedureRecursiveInput).value, 'output.myValue')
+
+        // The pulseNext key is set correctly
+        assertEquals((result.procedures['3'].pulseNext['output'][0] as PulseProcedureInput).procedureId, '4')
+    })
+
+    // console.log('result', JSON.stringify(result, null, 4))
 })
