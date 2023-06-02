@@ -96,19 +96,21 @@ interface Children {
     symbols: SymbolDsl[] | []
 }
 
+type ProcedureInputSpec = {
+    allowedTypes: TypedInputTypes[]
+    choices: string[]
+    allowLink: boolean
+    description: string
+}
+
+type ProcedureOutputSpec = {
+    type: 'pulse' | 'eval'
+    description: string
+}
+
 interface Schema {
-    inputSchema?: {
-        [name: string]: {
-            type: unknown
-            description: string
-        }
-    }
-    outputSchema?: {
-        [name: string]: {
-            type: unknown
-            description: string
-        }
-    }
+    inputSchema: Record<string, ProcedureInputSpec>
+    outputSchema?: Record<string, ProcedureOutputSpec>
     propertiesSchema: Property
     editorProperties: {
         icon: string

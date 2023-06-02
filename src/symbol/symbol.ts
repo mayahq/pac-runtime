@@ -99,10 +99,12 @@ class Symbol implements SymbolImpl {
     ) {
         const schema = this.getSelfSchema()
         const vals: Record<string, any> = {}
-        for (const propertyName in schema.propertiesSchema) {
+        for (const propertyName in schema.inputSchema) {
             vals[propertyName] = await _runner.evaluateProperty(propertyName, _pulse)
         }
 
+        // Do not allow completely overwriting the pulse. Properties can only
+        // be overwritten explicitly.
         const callback: RunnableCallback = (val: any, portName?: string) => {
             _callback({ ..._pulse, ...val }, portName)
         }
@@ -115,49 +117,6 @@ class Symbol implements SymbolImpl {
         _pulse?: Record<string, any>,
     ): Promise<any> {
         // Left for the symbol developer to override
-    }
-
-    private generateDslSchema(symbol: Symbol): { [name: string]: TypedMetadata } {
-        const { name, type } = this.getSelfProperties()
-        const evaluated: { [name: string]: TypedMetadata } | undefined = {}
-        Object.entries(this.getSelfSchema().propertiesSchema).forEach(([property, propVal]) => {
-            try {
-                const field: Property = { [property]: propVal }
-                if ((field[property] instanceof TypedInput)) {
-                    evaluated[property] = (propVal as TypedInput).generateSchema(property, propVal as TypedInput)
-                } else {
-                    evaluated[property] = {
-                        component: 'input',
-                        label: property,
-                    }
-                }
-            } catch (error) {
-                console.error(`Error evaluating ${property} in ${symbol.id}:${type}:${name}`, error)
-                throw error
-            }
-        })
-        return evaluated
-    }
-
-    toJSON(): string {
-        const { type, isConfig, description } = this.getSelfProperties()
-        const out: SymbolDsl = {
-            id: this.id,
-            type: type,
-            isConfig: isConfig,
-            description: description,
-            // properties: this.properties,
-            schema: {
-                editorProperties: this.getSelfSchema().editorProperties,
-                inputSchema: this.getSelfSchema().inputSchema,
-                outputSchema: this.getSelfSchema().outputSchema,
-                propertiesSchema: this.generateDslSchema(this),
-            },
-            children: this.children,
-            metadata: this.metadata,
-            wires: this.wires,
-        }
-        return JSON.stringify(out, null, 2)
     }
 }
 
