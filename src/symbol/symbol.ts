@@ -102,7 +102,11 @@ class Symbol implements SymbolImpl {
         for (const propertyName in schema.propertiesSchema) {
             vals[propertyName] = await _runner.evaluateProperty(propertyName, _pulse)
         }
-        this.call(vals, _callback, _pulse)
+
+        const callback: RunnableCallback = (val: any, portName?: string) => {
+            _callback({ ..._pulse, ...val }, portName)
+        }
+        this.call(vals, callback, _pulse)
     }
 
     async call(
