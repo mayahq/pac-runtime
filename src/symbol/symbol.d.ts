@@ -98,20 +98,22 @@ interface Children {
 
 type ProcedureInputSpec = {
     allowedTypes: TypedInputTypes[]
-    choices: string[]
-    allowLink: boolean
     description: string
+    allowLink?: boolean
+    displayName?: string
+    choices?: string[]
 }
 
 type ProcedureOutputSpec = {
     type: 'pulse' | 'eval'
     description: string
+    displayName?: string
 }
 
 interface Schema {
     inputSchema: Record<string, ProcedureInputSpec>
     outputSchema?: Record<string, ProcedureOutputSpec>
-    propertiesSchema: Property
+    propertiesSchema?: Property
     editorProperties: {
         icon: string
         color: string

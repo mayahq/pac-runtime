@@ -1,4 +1,4 @@
-import { Application, Router, RouterContext } from '../../deps.ts'
+import { Application, oakCors, Router, RouterContext } from '../../deps.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
@@ -11,7 +11,8 @@ import { RemoteStorage } from '../storage/remote.ts'
 import { stdpath } from '../../test_deps.ts'
 import { LocalStorage } from '../storage/local.ts'
 //
-import { Program, ProgramDsl } from '../../mod.ts'
+import { Program } from '../../mod.ts'
+import { LiteGraphSpec } from '../program/hybrid.d.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
 //fp
@@ -31,7 +32,7 @@ type RuntimeInitArgs = {
 }
 
 type DeployArgs = {
-    dsl: ProgramDsl
+    liteGraphDsl: LiteGraphSpec
     saveToStorage?: boolean
 }
 
@@ -94,7 +95,6 @@ export class Runtime implements RuntimeInterface {
     dynamicRoutes: DynamicRoute[]
 
     constructor(props: RuntimeInitArgs) {
-        console.log('runtime was constructed')
         this.id = props.id
         this.mayaRuntimeToken = props.mayaRuntimeToken
         this.ownerId = props.ownerId
@@ -136,6 +136,16 @@ export class Runtime implements RuntimeInterface {
         }
     }
 
+    get infoSummary() {
+        return {
+            id: this.id,
+            ownerId: this.ownerId,
+            environment: this.environment,
+            autoShutdown: this.autoShutdownBehaviour,
+            storage: this.storage,
+        }
+    }
+
     addHttpRoute(method: string, path: string, handler: RouteHandler) {
         const absolutePath = `/dynamic${path}`
         const regexp = pathToRegexp(absolutePath)
@@ -151,8 +161,8 @@ export class Runtime implements RuntimeInterface {
 
     async init() {
         this.comms.init()
-        const dsl = await this.storage.get(this.id)
-        await this.deploy({ dsl, saveToStorage: false })
+        const liteGraphDsl = await this.storage.get(this.id)
+        await this.deploy({ liteGraphDsl, saveToStorage: false })
 
         this.dynamicRouter.all('/(.*)', async (ctx) => {
             const pathname = ctx.request.url.pathname
@@ -170,15 +180,18 @@ export class Runtime implements RuntimeInterface {
             await dynamicRoute.handler(ctx)
         })
 
+        this.app.use(oakCors({ origin: '*' }))
         this.app.use(this.dynamicRouter.allowedMethods())
         this.app.use(this.dynamicRouter.routes())
 
+        console.log('Runtime', this.infoSummary)
         this.app.listen({ port: 9023 })
     }
 
-    async deploy({ dsl, saveToStorage = true }: DeployArgs) {
+    async deploy({ liteGraphDsl, saveToStorage = true }: DeployArgs) {
         this.program?.stop()
-        const program = new Program({ dsl })
+        const program = Program.from(liteGraphDsl)
+        // const program = new Program({ dsl })
         this.dynamicRoutes = []
 
         // Re-create the dynamic router
@@ -186,7 +199,7 @@ export class Runtime implements RuntimeInterface {
 
         await program.deploy(this)
         if (saveToStorage) {
-            await this.storage.set(this.id, program.dsl)
+            await this.storage.set(this.id, liteGraphDsl)
         }
         this.program = program
     }

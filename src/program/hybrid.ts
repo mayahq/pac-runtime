@@ -214,6 +214,7 @@ export class Program {
     allProcedures: Record<string, ProcedureDsl>
     leafInputMap: PortMap
     parentMap: Record<string, string>
+    liteGraphDsl?: LiteGraphSpec
 
     hub: EventTarget
     listener: EventListener
@@ -234,7 +235,9 @@ export class Program {
 
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
-        return new Program({ dsl })
+        const program = new Program({ dsl })
+        program.liteGraphDsl = spec
+        return program
     }
 
     getDeepRunnable(procedureId: string): Runnable {

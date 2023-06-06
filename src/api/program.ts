@@ -8,7 +8,7 @@ function getProgramRouter(runtime: Runtime) {
     router.post('/deploy', async (ctx) => {
         const reqBody = await ctx.request.body().value
         const program = reqBody.program
-        await runtime.deploy({ dsl: program })
+        await runtime.deploy({ liteGraphDsl: program })
 
         ctx.response.status = 200
         ctx.response.body = { message: 'Program successfully deployed' }
@@ -20,7 +20,7 @@ function getProgramRouter(runtime: Runtime) {
     })
 
     router.get('/', (ctx) => {
-        const program = runtime?.program?.dsl
+        const program = runtime?.program?.liteGraphDsl
         ctx.response.status = 200
         ctx.response.body = { program: program }
     })
