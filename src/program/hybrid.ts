@@ -48,6 +48,14 @@ type RunnableInitArgs = {
     baseProgram: Program
 }
 
+/**
+ * The runnable class represents an instance of a procedure
+ * (including subflows) that can be run. This is where the procedure
+ * code is actually run. Every runnable is run only once, and then discarded.
+ *
+ * A more apt name would be literally "Procedure",
+ * but that's taken by the Procedure class in the SDK.
+ */
 export class Runnable {
     dsl: ProcedureDsl
     parent: Runnable | null
@@ -75,6 +83,13 @@ export class Runnable {
         return this.dsl.inputs[name]
     }
 
+    /**
+     * Figures out which procedures to send the message next, based on it's
+     * output connections. Runs the `onProcedureDone` hooks before forwarding
+     * the pulse.
+     *
+     * @returns a function that asks the hub to forward the pulse to said procedures.
+     */
     private getPulseCallback(): RunnableCallback {
         const leafInputMap = this.baseProgram.leafInputMap[this.dsl.id]
         let fn = (_val: any, _?: string) => {}
@@ -110,6 +125,18 @@ export class Runnable {
         }
     }
 
+    /**
+     * Figures out how to resolve the value of an input. For eval type properties,
+     * recursively executes previous procedures to get the value.
+     *
+     * Every directly-connected previous procedure is executed only once. After
+     * that, it's value is cached. This ensures that if one running-instance of a
+     * procedure requires two of it's eval-type fields from the same procedure, it
+     * doesn't end up executing it twice. This works with subflows as well.
+     *
+     * @param name Name of the field to be evaluated
+     * @returns a function that returns the evaluated value of the said field.
+     */
     private getEvaluateSymbolFieldFunction(name: string): EvaluateFieldFunc {
         const field = this.getFieldSpec(name)
         switch (field.type) {
@@ -163,11 +190,26 @@ export class Runnable {
         }
     }
 
+    /**
+     * Evaluates the value of a given input of the procedure.
+     *
+     * @param name Name of the input.
+     * @param pulse Pulse received at time of evaluation.
+     * @returns The evaluated value of the input.
+     */
     evaluateProperty(name: string, pulse?: Record<string, any>) {
         const evaluatePropertyFunc = this.getEvaluateSymbolFieldFunction(name)
         return evaluatePropertyFunc(pulse)
     }
 
+    /**
+     * Recursively calls the init method of all leaf procedures
+     * that this runnable contains.
+     *
+     * @param runtime Runtime instance
+     * @param promises Accumulator of all the promises returned by the init
+     *                 methods of all leaf nodes.
+     */
     async init(runtime?: Runtime, promises: Promise<any>[] = []) {
         const leafProcDef = this.baseProgram.leafProcedures[this.dsl.id]
         if (leafProcDef) {
@@ -185,6 +227,13 @@ export class Runnable {
         await Promise.all(promises)
     }
 
+    /**
+     * Runs the `call` method of a procedure. For subflow evals, it will recursively
+     * call itself for the children node connected to it's eval outputs.
+     *
+     * @param pulse The pulse received, if triggered by pulse.
+     * @returns whatever the procedure passed to the callback in it's `call` method.
+     */
     async run(pulse?: Record<string, any>): Promise<any> {
         /**
          * Execute the symbol if its a leaf symbol
@@ -220,7 +269,8 @@ export class Runnable {
         }
 
         /**
-         * We've run into my biggest enemy - a lambda.
+         * We've run into my biggest enemy - a lambda. Find out which children
+         * nodes contribute to the output of this lambda.
          */
         const outputChildren: ProcedureDsl[] = []
         Object.values(this.dsl.children!.outputs).forEach((out) => {
@@ -228,6 +278,9 @@ export class Runnable {
             outputChildren.push(child)
         })
 
+        /**
+         * And then run them.
+         */
         return await Promise.all(outputChildren.map((symbol) => {
             const runnable = new Runnable({
                 dsl: symbol,
@@ -239,6 +292,13 @@ export class Runnable {
     }
 }
 
+/**
+ * The Program class contains all the informatin global to the program,
+ * such as the DSL, the event hub, the procedure instances, etc.
+ *
+ * Every runtime will have one Program object related to it, at any
+ * point of time.
+ */
 export class Program {
     dsl: ProgramDsl
     leafProcedures: Record<string, LeafProcedureDef>
@@ -268,6 +328,13 @@ export class Program {
         }
     }
 
+    /**
+     * Takes a LiteGraph DSL and returns the corresponding Program
+     * object. Useful if you want to run a LiteGraph program
+     *
+     * @param spec The program DSL in LiteGraph spec.
+     * @returns Program instance that can be deployed and run.
+     */
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
         const program = new Program({ dsl })
@@ -345,6 +412,17 @@ export class Program {
         })
     }
 
+    /**
+     * To run a runnable in eval mode, it must have the correct `parent`
+     * runnable set. Simply creating a Runnable instance via it's DSL
+     * with a `null` parent will not work.
+     *
+     * This function takes a procedure ID and creates a Runnable with the
+     * right parent, with the right parent, with the right parent, and so on.
+     *
+     * @param procedureId ID of the procedure to get a runnable for
+     * @returns A runnable with it's parents populated
+     */
     getDeepRunnable(procedureId: string): Runnable {
         if (!this.allProcedures[procedureId]) {
             throw new Error(`Procedure with ID: ${procedureId} does not exist.`)
@@ -370,6 +448,13 @@ export class Program {
         return runnable as Runnable
     }
 
+    /**
+     * Gets the type of a procedure from the DSL, uses it to construct
+     * the remote URL where it's code exists, and then imports it.
+     *
+     * @param type The type of the procedure
+     * @returns Whatever is imported from the remote procedure file
+     */
     private async importProcedureType(type: string) {
         if (type.startsWith('gh:')) {
             // gh:mayahq/stdlib/http
@@ -405,6 +490,19 @@ export class Program {
         }
     }
 
+    /**
+     * Gets instances of all leaf (non-subflow) procedures in the program.
+     * This needs to be done because the program has a deploy state, so its
+     * important that there is only one instance of one procedure because the
+     * procedure might be accumulating information within itself on every call.
+     *
+     * For example, if a procedure is supposed to register an HTTP endpoint
+     * with the runtime on initialisation, we need to make sure it only happens
+     * once.
+     *
+     * @param procedures Map of procedures to their IDs, out of which the leaf procedures are to be found.
+     * @param runtime Runtime instance
+     */
     private async getLeafProcedures(
         procedures: Record<string, ProcedureDsl> = this.dsl.procedures,
         runtime?: Runtime,
@@ -425,6 +523,12 @@ export class Program {
         }
     }
 
+    /**
+     * Calls the init method of every leaf procedure to,
+     * well, initalise it.
+     *
+     * @param runtime Runtime instance
+     */
     async init(runtime?: Runtime) {
         const parent: ProcedureDsl = {
             id: 'parent',
@@ -444,6 +548,12 @@ export class Program {
         }).init(runtime)
     }
 
+    /**
+     * Initialises the program and starts the event hub to
+     * facilitate pulse-based communication between procedures.
+     *
+     * @param runtime Runtime instance
+     */
     async deploy(runtime?: Runtime) {
         await this.getLeafProcedures(this.dsl.procedures, runtime)
         await this.init(runtime)
@@ -464,14 +574,31 @@ export class Program {
         this.hub.addEventListener('pulse', listener)
     }
 
+    /**
+     * Disables pulse-based communication between procedures.
+     */
     async stop() {
         this.hub.removeEventListener('pulse', this.listener)
     }
 
+    /**
+     * Allows the programmer to hook into certain events such as
+     * procedure completion, pulse reception, etc. Think of it like
+     * the `addEventListener` API in the browser.
+     *
+     * @param event Type of event to register a hook for.
+     * @param hook Function to run when said event occurs.
+     */
     async addHook(event: ProgramEvent, hook: ProgramHook) {
         this.hooks[event].push(hook)
     }
 
+    /**
+     * Allows the programmer to remove a hook.
+     *
+     * @param event Type of event to remove the hook from.
+     * @param hook The hook to remove.
+     */
     async removeHook(event: ProgramEvent, hook: ProgramHook) {
         this.hooks[event] = this.hooks[event].filter((h) => h !== hook)
     }
