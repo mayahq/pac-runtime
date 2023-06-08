@@ -59,11 +59,14 @@ export class Runnable {
 
     private getPulseCallback(): RunnableCallback {
         const leafInputMap = this.baseProgram.leafInputMap[this.dsl.id]
+        console.log('we here', this.dsl.id, Object.keys(this.baseProgram.leafProcedures), leafInputMap)
         if (!this.isLeafProcedure() || !leafInputMap) {
+            console.log('and here', this.dsl.id)
             return (_val, _) => null
         }
         // console.log('lim', this.baseProgram.leafInputMap)
         return (val: any, portName?: string) => {
+            console.log('we here', val)
             const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
             destinations.forEach((destination) => {
                 const pulseData: PulseEventDetail = {
@@ -159,6 +162,7 @@ export class Runnable {
     }
 
     async run(pulse?: Record<string, any>): Promise<any> {
+        console.log('running', this.dsl)
         /**
          * Execute the symbol if its a leaf symbol
          */
@@ -224,6 +228,7 @@ export class Program {
 
         this.leafProcedures = {}
         this.leafInputMap = createLeafInputMap(this.dsl)
+        console.log('leafInputMap', this.leafInputMap, this.dsl)
 
         const procedureList = Object.values(this.dsl.procedures)
         this.parentMap = createParentMap(procedureList)
@@ -235,6 +240,8 @@ export class Program {
 
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
+        console.log('the dsl', dsl)
+        console.log('the spec', spec)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -340,13 +347,17 @@ export class Program {
     }
 
     async deploy(runtime?: Runtime) {
-        await this.getLeafProcedures()
+        await this.getLeafProcedures(this.dsl.procedures, runtime)
         await this.init(runtime)
+
+        console.log('leafs', Object.keys(this.leafProcedures))
 
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
             const { pulse, destination } = data
+
+            console.log('data', data)
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({

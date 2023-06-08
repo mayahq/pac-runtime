@@ -219,6 +219,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
     }
 
     for (const link of lNode.subgraph!.links) {
+        console.log('at link', link)
         const sourceId = link[1].toString()
         const sourcePortIdx = link[2] as number
         const sourceNode = nodeMap[sourceId]
@@ -257,7 +258,8 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else {
-            if (sourcePort.type === 'basepulse') {
+            console.log('we here', sourcePort)
+            if (sourcePort.type === 'basepulse' || sourcePort.type === 'pulse') { // Ugly. Needs to be a single type
                 if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
                 }
