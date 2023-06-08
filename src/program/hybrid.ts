@@ -1,8 +1,20 @@
+/**
+ * Given how fast we've switched between execution styles,
+ * it's very probable that some of the design decisions I made
+ * for older execution styles have leaked into this one. It's
+ * possible that things can be done a lot more efficiently or
+ * simply than the current version. If you discover anything
+ * like that, please reach out immediately.
+ *
+ * - dusnat
+ */
+
 import type {
     EvaluateFieldFunc,
     LiteGraphSpec,
     ProcedureDsl,
     ProgramDsl,
+    ProgramEvent,
     PulseEventDetail,
     RunnableCallback,
 } from './hybrid.d.ts'
@@ -10,12 +22,17 @@ import { Runtime } from '../runtime/runtime.ts'
 import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
-import { createLeafInputMap, createParentMap, getAllProcedures, getProgramDsl, PortMap } from './translate.ts'
-
-// pulse event: pulse::${proc_id}
+import {
+    createLeafInputMap,
+    createParentMap,
+    getAllProcedures,
+    getFirstProcId,
+    getLastProcId,
+    getProgramDsl,
+    PortMap,
+} from './translate.ts'
 
 type ProgramInitArgs = {
-    // dsl: ProgramDsl
     dsl: ProgramDsl
 }
 
@@ -59,30 +76,36 @@ export class Runnable {
 
     private getPulseCallback(): RunnableCallback {
         const leafInputMap = this.baseProgram.leafInputMap[this.dsl.id]
-        console.log('we here', this.dsl.id, Object.keys(this.baseProgram.leafProcedures), leafInputMap)
-        if (!this.isLeafProcedure() || !leafInputMap) {
-            console.log('and here', this.dsl.id)
-            return (_val, _) => null
-        }
-        // console.log('lim', this.baseProgram.leafInputMap)
-        return (val: any, portName?: string) => {
-            console.log('we here', val)
-            const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
-            destinations.forEach((destination) => {
-                const pulseData: PulseEventDetail = {
-                    pulse: val,
-                    metadata: {
-                        sender: this.dsl.id,
-                        timestamp: Date.now(),
-                    },
-                    destination: destination,
-                }
-                const pulseEvent = new CustomEvent('pulse', {
-                    detail: pulseData,
-                })
+        let fn = (_val: any, _?: string) => {}
 
-                this.baseProgram.hub.dispatchEvent(pulseEvent)
-            })
+        if (!this.isLeafProcedure() || !leafInputMap) {
+            fn = (_val, _) => null
+        } else {
+            fn = (val: any, portName?: string) => {
+                const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
+                destinations.forEach((destination) => {
+                    const pulseData: PulseEventDetail = {
+                        pulse: val,
+                        metadata: {
+                            sender: this.dsl.id,
+                            timestamp: Date.now(),
+                        },
+                        destination: destination,
+                    }
+                    const pulseEvent = new CustomEvent('pulse', {
+                        detail: pulseData,
+                    })
+
+                    this.baseProgram.hub.dispatchEvent(pulseEvent)
+                })
+            }
+        }
+
+        return (val: any, portName?: string) => {
+            // Run the procedure-done hooks
+            // console.log('pulseCallbackVal', val)
+            this.baseProgram.hooks['onProcedureDone'].forEach((hook) => hook(val, this.dsl.id, portName))
+            fn(val, portName)
         }
     }
 
@@ -162,13 +185,15 @@ export class Runnable {
     }
 
     async run(pulse?: Record<string, any>): Promise<any> {
-        console.log('running', this.dsl)
         /**
          * Execute the symbol if its a leaf symbol
          */
         if (this.baseProgram.leafProcedures[this.dsl.id]) {
-            return await new Promise((resolve) => {
-                let callback: RunnableCallback = (val, _) => resolve(val)
+            const val = await new Promise((resolve) => {
+                let callback: RunnableCallback = (val, _) => {
+                    this.baseProgram.hooks['onProcedureDone'].forEach((fn) => fn(val, this.dsl.id))
+                    resolve(val)
+                }
                 if (pulse) {
                     resolve(1) // Don't need to wait for the procedure if this is pulse-based
                     callback = (val, port) => {
@@ -182,6 +207,7 @@ export class Runnable {
                     pulse,
                 )
             })
+            return val
         }
 
         /**
@@ -219,6 +245,7 @@ export class Program {
     leafInputMap: PortMap
     parentMap: Record<string, string>
     liteGraphDsl?: LiteGraphSpec
+    hooks: Record<ProgramEvent, Function[]>
 
     hub: EventTarget
     listener: EventListener
@@ -228,7 +255,6 @@ export class Program {
 
         this.leafProcedures = {}
         this.leafInputMap = createLeafInputMap(this.dsl)
-        console.log('leafInputMap', this.leafInputMap, this.dsl)
 
         const procedureList = Object.values(this.dsl.procedures)
         this.parentMap = createParentMap(procedureList)
@@ -236,15 +262,86 @@ export class Program {
 
         this.hub = new EventTarget()
         this.listener = (_) => undefined
+        this.hooks = {
+            onProcedureDone: [],
+        }
     }
 
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
-        console.log('the dsl', dsl)
-        console.log('the spec', spec)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
+    }
+
+    /**
+     * Runs a program with a given pulse and returns the response.
+     * Use this if you're trying to experiment.
+     *
+     * @param spec The program DSL in LiteGraph form.
+     * @param runtime An instance of the Runtime class.
+     * @param data The pulse to inject in the starting node.
+     * @param firstProcedureId The starting node ID. Will be auto-determined (best effort) if not provided.
+     * @param lastProcedureId The terminating node ID. Will be auto-determined (best effort) if not proviced.
+     * @param timeout The timeout for evaluation, starting *after* the program has deployed completely.
+     * @returns
+     */
+    static eval(
+        spec: LiteGraphSpec,
+        runtime: Runtime,
+        data: any,
+        firstProcedureId?: string,
+        lastProcedureId?: string,
+        timeout?: number,
+    ): Promise<any> {
+        if (!firstProcedureId) {
+            firstProcedureId = getFirstProcId(spec)
+        }
+        if (!lastProcedureId) {
+            lastProcedureId = getLastProcId(spec)
+        }
+
+        const program = Program.from(spec)
+        let errorTimeout: any = null
+
+        return new Promise((resolve, reject) => {
+            const handler = async (val: any, id: string, portName: string) => {
+                console.log('handler called for', val, id)
+                if (id !== lastProcedureId) {
+                    return
+                }
+
+                if (errorTimeout) {
+                    clearTimeout(errorTimeout)
+                }
+                resolve({ result: val, portName })
+                program.removeHook('onProcedureDone', handler)
+            }
+
+            program.addHook('onProcedureDone', handler)
+            program.deploy(runtime)
+                .then(() => {
+                    if (timeout) {
+                        errorTimeout = setTimeout(() => {
+                            program.stop()
+                            reject(new Error('Timed out!'))
+                        }, timeout)
+                    }
+
+                    const e = new CustomEvent('pulse', {
+                        detail: {
+                            pulse: data,
+                            metadata: {
+                                sender: '0',
+                                timestamp: Date.now(),
+                            },
+                            destination: firstProcedureId,
+                        },
+                    })
+
+                    program.hub.dispatchEvent(e)
+                })
+        })
     }
 
     getDeepRunnable(procedureId: string): Runnable {
@@ -350,14 +447,10 @@ export class Program {
         await this.getLeafProcedures(this.dsl.procedures, runtime)
         await this.init(runtime)
 
-        console.log('leafs', Object.keys(this.leafProcedures))
-
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
             const { pulse, destination } = data
-
-            console.log('data', data)
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({
@@ -372,5 +465,13 @@ export class Program {
 
     async stop() {
         this.hub.removeEventListener('pulse', this.listener)
+    }
+
+    async addHook(event: ProgramEvent, hook: Function) {
+        this.hooks[event].push(hook)
+    }
+
+    async removeHook(event: ProgramEvent, hook: Function) {
+        this.hooks[event] = this.hooks[event].filter((h) => h !== hook)
     }
 }

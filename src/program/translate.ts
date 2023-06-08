@@ -219,7 +219,6 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
     }
 
     for (const link of lNode.subgraph!.links) {
-        console.log('at link', link)
         const sourceId = link[1].toString()
         const sourcePortIdx = link[2] as number
         const sourceNode = nodeMap[sourceId]
@@ -258,7 +257,6 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else {
-            console.log('we here', sourcePort)
             if (sourcePort.type === 'basepulse' || sourcePort.type === 'pulse') { // Ugly. Needs to be a single type
                 if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
@@ -281,6 +279,10 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
     return children
 }
 
+/**
+ * @param graph The program in LiteGraph form
+ * @returns The executable program DSL
+ */
 export function getProgramDsl(graph: LiteGraphSpec): ProgramDsl {
     const lNode: LiteGraphNode = {
         id: 0,
@@ -295,4 +297,68 @@ export function getProgramDsl(graph: LiteGraphSpec): ProgramDsl {
     return {
         procedures: children!.procedures,
     }
+}
+
+/**
+ * Finds the ID of the first procedure that has no pulse-input
+ * going into it
+ *
+ * @param graph The program in LiteGraph form
+ * @returns The ID of the starting procedure
+ */
+export function getFirstProcId(graph: LiteGraphSpec): string {
+    const { nodes, links } = graph
+    const nodeMap: Record<string, LiteGraphNode> = {}
+    nodes.forEach((n) => nodeMap[n.id.toString()] = n)
+
+    const nodeIdsWithPulseInput: Record<string, boolean> = {}
+    for (const link of links) {
+        const destNode = nodeMap[link[3].toString()]
+        const destNodePort = link[4]
+        const input = destNode?.inputs?.[destNodePort as number]
+
+        if (input?.type === 'basepulse') {
+            nodeIdsWithPulseInput[destNode.id.toString()] = true
+        }
+    }
+
+    for (const nodeId in nodeMap) {
+        if (!nodeIdsWithPulseInput[nodeId]) {
+            return nodeId
+        }
+    }
+
+    throw new Error('Starting node could not be auto-determined (every node has a pulse input).')
+}
+
+/**
+ * Finds the ID of the first procedure that has no pulse-output
+ * going into it.
+ *
+ * @param graph The program in LiteGraph form
+ * @returns The ID of the terminating procedure
+ */
+export function getLastProcId(graph: LiteGraphSpec): string {
+    const { nodes, links } = graph
+    const nodeMap: Record<string, LiteGraphNode> = {}
+    nodes.forEach((n) => nodeMap[n.id.toString()] = n)
+
+    const nodeIdsWithPulseOutput: Record<string, boolean> = {}
+    for (const link of links) {
+        const sourceNode = nodeMap[link[1].toString()]
+        const sourceNodePort = link[2]
+        const output = sourceNode?.outputs?.[sourceNodePort as number]
+
+        if (output?.type === 'basepulse' || output?.type === 'pulse') {
+            nodeIdsWithPulseOutput[sourceNode.id.toString()] = true
+        }
+    }
+
+    for (const nodeId in nodeMap) {
+        if (!nodeIdsWithPulseOutput[nodeId]) {
+            return nodeId
+        }
+    }
+
+    throw new Error('Terminating node could not be auto-determined (every node has a pulse output).')
 }

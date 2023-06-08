@@ -124,3 +124,5 @@ export type LiteGraphSpec = {
     config?: Record<string, any>
     version?: number
 }
+
+export type ProgramEvent = 'onProcedureDone'

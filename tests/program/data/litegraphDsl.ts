@@ -86,7 +86,7 @@ export const liteGraphWorkingExample: LiteGraphSpec = {
             type: functionPath,
             inputs: [
                 typedIn('body', 'return { output: { myValue: input * 2 } }'),
-                pulseIn('input', 'myValue'),
+                procIn('input', 'myValue'),
                 pulse(),
             ],
             outputs: [
@@ -114,6 +114,8 @@ export const liteGraphWorkingExample: LiteGraphSpec = {
         [3, 3, 1, 4, 1, -1],
     ],
 }
+
+console.log(JSON.stringify(liteGraphWorkingExample, null, 4))
 
 // export const liteGraphWithSubflows: LiteGraphSpec = {
 //     nodes: [

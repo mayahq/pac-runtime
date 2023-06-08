@@ -1,5 +1,6 @@
 import { Router } from '../../deps.ts'
 import { Runtime } from '../runtime/runtime.ts'
+import { Program } from '../program/hybrid.ts'
 
 function getProgramRouter(runtime: Runtime) {
     const router = new Router()
@@ -17,6 +18,19 @@ function getProgramRouter(runtime: Runtime) {
     router.post('/stop', (ctx) => {
         ctx.response.status = 200
         ctx.response.body = { message: 'Program successfully stopped ' }
+    })
+
+    router.post('/eval', async (ctx) => {
+        const reqBody = await ctx.request.body().value
+        const { program, data, firstProcedureId, lastProcedureId, timeout } = reqBody
+        try {
+            const result = await Program.eval(program, runtime, data, firstProcedureId, lastProcedureId, timeout)
+            ctx.response.status = 200
+            ctx.response.body = result
+        } catch (e) {
+            ctx.response.status = 500
+            ctx.response.body = e
+        }
     })
 
     router.get('/', (ctx) => {
