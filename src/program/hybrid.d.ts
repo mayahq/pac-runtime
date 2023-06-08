@@ -126,3 +126,6 @@ export type LiteGraphSpec = {
 }
 
 export type ProgramEvent = 'onProcedureDone'
+export type OnProcDoneHook = (val: any, nodeId: string, portName?: string) => any
+
+export type ProgramHook = OnProcDoneHook

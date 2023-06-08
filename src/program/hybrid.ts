@@ -15,6 +15,7 @@ import type {
     ProcedureDsl,
     ProgramDsl,
     ProgramEvent,
+    ProgramHook,
     PulseEventDetail,
     RunnableCallback,
 } from './hybrid.d.ts'
@@ -245,7 +246,7 @@ export class Program {
     leafInputMap: PortMap
     parentMap: Record<string, string>
     liteGraphDsl?: LiteGraphSpec
-    hooks: Record<ProgramEvent, Function[]>
+    hooks: Record<ProgramEvent, ProgramHook[]>
 
     hub: EventTarget
     listener: EventListener
@@ -305,7 +306,7 @@ export class Program {
         let errorTimeout: any = null
 
         return new Promise((resolve, reject) => {
-            const handler = async (val: any, id: string, portName: string) => {
+            const handler = async (val: any, id: string, portName?: string) => {
                 console.log('handler called for', val, id)
                 if (id !== lastProcedureId) {
                     return
@@ -467,11 +468,11 @@ export class Program {
         this.hub.removeEventListener('pulse', this.listener)
     }
 
-    async addHook(event: ProgramEvent, hook: Function) {
+    async addHook(event: ProgramEvent, hook: ProgramHook) {
         this.hooks[event].push(hook)
     }
 
-    async removeHook(event: ProgramEvent, hook: Function) {
+    async removeHook(event: ProgramEvent, hook: ProgramHook) {
         this.hooks[event] = this.hooks[event].filter((h) => h !== hook)
     }
 }
