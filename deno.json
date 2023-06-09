@@ -2,7 +2,7 @@
 	"tasks": {
 		"dev": "deno run --watch --allow-all --reload=https://raw.githubusercontent.com --lock=deno.lock --lock-write local.ts",
 		"run": "deno run --allow-all main.ts",
-		"test": "deno test tests --allow-all --quiet --lock=deno.lock --lock-write",
+		"test": "deno test tests --allow-all --reload=https://raw.githubusercontent.com --quiet --lock=deno.lock --lock-write",
 		"push_image": "./scripts/push_to_ecr.sh"
 	},
 	"fmt": {

@@ -165,7 +165,9 @@
     "https://deno.land/x/oak@v12.4.0/testing.ts": "a0be5c84981afde666de29630f34b09d944ca1a2fe6a5185644b60ad95e16d18",
     "https://deno.land/x/oak@v12.4.0/types.d.ts": "1d15e19052254c4d0ff84bb74d84def42588b2fbc59f5f6dc2c3fe5bdbb6b31b",
     "https://deno.land/x/oak@v12.4.0/util.ts": "3af8c4ed04c6cc2bedbe66e562a77fc59c72df31c55a902a63885861ca1639d6",
-    "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556"
+    "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556",
+    "https://raw.githubusercontent.com/mayahq/stdlib/main/deps.ts": "3f040defd8875f779f0b2dd69bd4059e078252ba01deda6d904d30a820129519",
+    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/function/function.ts": "7e254fd5ff11a6b0702f7a04ce383c05f03148020b1b2867aebd0eba927435a5"
   },
   "npm": {
     "specifiers": {

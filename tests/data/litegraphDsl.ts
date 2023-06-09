@@ -51,7 +51,8 @@ function pulseOut(name: string) {
     }
 }
 
-const functionPath = `File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts`
+// const functionPath = `File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts`
+const functionPath = `gh:mayahq/stdlib/function`
 
 export const liteGraphWorkingExample: LiteGraphSpec = {
     nodes: [
