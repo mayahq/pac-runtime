@@ -10,6 +10,10 @@ import {
 
 export type PortMap = Record<string, Record<string, string[]>>
 
+export class TranslateError extends Error {
+    static type = 'TRANSLATE_ERROR'
+}
+
 /**
  * @param proc An individual procedure's DSL
  * @returns `true` if the procedure is a leaf procedure, `false` otherwise.
@@ -328,7 +332,7 @@ export function getFirstProcId(graph: LiteGraphSpec): string {
         }
     }
 
-    throw new Error('Starting node could not be auto-determined (every node has a pulse input).')
+    throw new TranslateError('Starting node could not be auto-determined (every node has a pulse input).')
 }
 
 /**
@@ -348,10 +352,10 @@ export function getLastProcId(graph: LiteGraphSpec): string {
         const sourceNode = nodeMap[link[1].toString()]
         const sourceNodePort = link[2]
         const output = sourceNode?.outputs?.[sourceNodePort as number]
+        nodeIdsWithPulseOutput[sourceNode.id.toString()] = true
 
-        if (output?.type === 'basepulse' || output?.type === 'pulse') {
-            nodeIdsWithPulseOutput[sourceNode.id.toString()] = true
-        }
+        // if (output?.type === 'basepulse' || output?.type === 'pulse') {
+        // }
     }
 
     for (const nodeId in nodeMap) {
@@ -360,5 +364,5 @@ export function getLastProcId(graph: LiteGraphSpec): string {
         }
     }
 
-    throw new Error('Terminating node could not be auto-determined (every node has a pulse output).')
+    throw new TranslateError('Terminating node could not be auto-determined (every node has a pulse output).')
 }

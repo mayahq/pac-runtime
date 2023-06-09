@@ -116,3 +116,38 @@ export const liteGraphWorkingExample: LiteGraphSpec = {
 }
 
 // console.log(JSON.stringify(liteGraphWorkingExample, null, 4))
+
+export const liteGraphCyclic = {
+    nodes: [
+        {
+            id: 1,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'return { output: { myValue: 3 } }'),
+                typedIn('input', ''),
+                pulse(),
+            ],
+            outputs: [
+                evalOut('result'),
+                pulseOut('result'),
+            ],
+        },
+        {
+            id: 2,
+            type: functionPath,
+            inputs: [
+                typedIn('body', 'return { output: { myValue: input * 6 } }'),
+                procIn('input', 'output.myValue'),
+                pulse(),
+            ],
+            outputs: [
+                evalOut('result'),
+                pulseOut('result'),
+            ],
+        },
+    ],
+    links: [
+        [1, 1, 1, 2, 2, -1],
+        [2, 2, 1, 1, 2, -1],
+    ],
+}

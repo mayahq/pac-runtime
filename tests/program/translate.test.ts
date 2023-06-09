@@ -2,13 +2,16 @@ import {
     createLeafInputMap,
     createOutInMap,
     createParentMap,
+    getFirstProcId,
+    getLastProcId,
     getLeafInputs,
     getProgramDsl,
+    TranslateError,
 } from '../../src/program/translate.ts'
 import { simpleTranslateTestDsl } from '../data/translateDsl.ts'
-import { liteGraphWorkingExample } from '../data/litegraphDsl.ts'
+import { liteGraphCyclic, liteGraphWorkingExample } from '../data/litegraphDsl.ts'
 
-import { assertArrayIncludes, assertEquals } from '../../test_deps.ts'
+import { assertArrayIncludes, assertEquals, assertThrows } from '../../test_deps.ts'
 import { ProcedureRecursiveInput, PulseProcedureInput } from '../../src/program/hybrid.d.ts'
 
 Deno.test('Program translation', async (t) => {
@@ -71,5 +74,35 @@ Deno.test('LiteGraph to execution DSL conversion', async (t) => {
 
         // The pulseNext key is set correctly
         assertEquals((result.procedures['3'].pulseNext['result'][0] as PulseProcedureInput).procedureId, '4')
+    })
+})
+
+Deno.test('Edge procedure detection for program eval', async (t) => {
+    await t.step('Finding starting procedure', async (t) => {
+        await t.step('Returns correct procedure ID when possible', () => {
+            const id = getFirstProcId(liteGraphWorkingExample)
+            assertEquals(id, '1')
+        })
+
+        await t.step('Errors out when determining first procedure is impossible', () => {
+            assertThrows(
+                () => getFirstProcId(liteGraphCyclic),
+                TranslateError,
+            )
+        })
+    })
+
+    await t.step('Finding the ending procedure', async (t) => {
+        await t.step('Returns correct procedure ID when possible', () => {
+            const id = getLastProcId(liteGraphWorkingExample)
+            assertEquals(id, '4')
+        })
+
+        await t.step('Errors out when determining last procedure is impossible', () => {
+            assertThrows(
+                () => getLastProcId(liteGraphCyclic),
+                TranslateError,
+            )
+        })
     })
 })
