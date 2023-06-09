@@ -24,7 +24,7 @@ function getProgramRouter(runtime: Runtime) {
         const reqBody = await ctx.request.body().value
         const { program, data, firstProcedureId, lastProcedureId, timeout } = reqBody
         try {
-            const result = await Program.eval(program, runtime, data, firstProcedureId, lastProcedureId, timeout)
+            const result = await Program.eval(program, data, runtime, firstProcedureId, lastProcedureId, timeout)
             ctx.response.status = 200
             ctx.response.body = result
         } catch (e) {

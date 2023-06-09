@@ -356,8 +356,8 @@ export class Program {
      */
     static eval(
         spec: LiteGraphSpec,
-        runtime: Runtime,
         data: any,
+        runtime?: Runtime,
         firstProcedureId?: string,
         lastProcedureId?: string,
         timeout?: number,
@@ -374,7 +374,6 @@ export class Program {
 
         return new Promise((resolve, reject) => {
             const handler = async (val: any, id: string, portName?: string) => {
-                console.log('handler called for', val, id)
                 if (id !== lastProcedureId) {
                     return
                 }
