@@ -350,12 +350,7 @@ export function getLastProcId(graph: LiteGraphSpec): string {
     const nodeIdsWithPulseOutput: Record<string, boolean> = {}
     for (const link of links) {
         const sourceNode = nodeMap[link[1].toString()]
-        const sourceNodePort = link[2]
-        const output = sourceNode?.outputs?.[sourceNodePort as number]
         nodeIdsWithPulseOutput[sourceNode.id.toString()] = true
-
-        // if (output?.type === 'basepulse' || output?.type === 'pulse') {
-        // }
     }
 
     for (const nodeId in nodeMap) {

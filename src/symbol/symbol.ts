@@ -1,5 +1,4 @@
-import type { Children, Metadata, Property, Schema, SymbolDsl, SymbolImpl, TypedMetadata, Wires } from './symbol.d.ts'
-import TypedInput from './inputs/typedInput.ts'
+import type { Children, Metadata, Schema, SymbolDsl, SymbolImpl, Wires } from './symbol.d.ts'
 import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
 import { Runnable } from '../program/hybrid.ts'

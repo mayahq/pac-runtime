@@ -10,6 +10,7 @@ function getHealthRouter(runtime: Runtime): Router {
         ctx.response.body = {
             status: 'ok',
             timestamp: Date.now(),
+            info: runtime.infoSummary,
         }
     })
 

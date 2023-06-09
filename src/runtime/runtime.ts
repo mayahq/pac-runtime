@@ -1,4 +1,4 @@
-import { Application, oakCors, Router, RouterContext } from '../../deps.ts'
+import { Application, Router, RouterContext } from '../../deps.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
@@ -180,7 +180,6 @@ export class Runtime implements RuntimeInterface {
             await dynamicRoute.handler(ctx)
         })
 
-        this.app.use(oakCors({ origin: '*' }))
         this.app.use(this.dynamicRouter.allowedMethods())
         this.app.use(this.dynamicRouter.routes())
 

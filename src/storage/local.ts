@@ -1,7 +1,6 @@
 import { stdpath } from '../../deps.ts'
 import { Storage } from './typings.d.ts'
-// import { ProgramDSL } from '../program/program.ts'
-import { LiteGraphSpec, ProgramDsl } from '../program/hybrid.d.ts'
+import { LiteGraphSpec } from '../program/hybrid.d.ts'
 
 type LocalStorageInitArgs = {
     basePath: string
