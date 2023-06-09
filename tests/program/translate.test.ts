@@ -5,8 +5,8 @@ import {
     getLeafInputs,
     getProgramDsl,
 } from '../../src/program/translate.ts'
-import { simpleTranslateTestDsl } from './data/translateDsl.ts'
-import { liteGraphWorkingExample } from './data/litegraphDsl.ts'
+import { simpleTranslateTestDsl } from '../data/translateDsl.ts'
+import { liteGraphWorkingExample } from '../data/litegraphDsl.ts'
 
 import { assertArrayIncludes, assertEquals } from '../../test_deps.ts'
 import { ProcedureRecursiveInput, PulseProcedureInput } from '../../src/program/hybrid.d.ts'
@@ -67,11 +67,9 @@ Deno.test('LiteGraph to execution DSL conversion', async (t) => {
         assertEquals((result.procedures['3'].inputs['input'] as ProcedureRecursiveInput).id, '2')
 
         // All recursive eval outputs are merged into one and inputs are namespaced correctly
-        assertEquals((result.procedures['3'].inputs['input'] as ProcedureRecursiveInput).value, 'output.myValue')
+        assertEquals((result.procedures['3'].inputs['input'] as ProcedureRecursiveInput).value, 'result.output.myValue')
 
         // The pulseNext key is set correctly
-        assertEquals((result.procedures['3'].pulseNext['output'][0] as PulseProcedureInput).procedureId, '4')
+        assertEquals((result.procedures['3'].pulseNext['result'][0] as PulseProcedureInput).procedureId, '4')
     })
-
-    // console.log('result', JSON.stringify(result, null, 4))
 })

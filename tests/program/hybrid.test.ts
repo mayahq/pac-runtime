@@ -1,7 +1,7 @@
 import { assertEquals } from '../../test_deps.ts'
 import { PulseEventDetail } from '../../src/program/hybrid.d.ts'
 import { Program } from '../../src/program/hybrid.ts'
-import { liteGraphWorkingExample } from './data/litegraphDsl.ts'
+import { liteGraphWorkingExample } from '../data/litegraphDsl.ts'
 
 Deno.test('Program execution', async () => {
     const program = Program.from(liteGraphWorkingExample)
@@ -33,5 +33,5 @@ Deno.test('Program execution', async () => {
         program.hub.dispatchEvent(e)
     })
 
-    assertEquals((pulse as any).output.myValue, 36)
+    assertEquals((pulse as any).result.output.myValue, 36)
 })

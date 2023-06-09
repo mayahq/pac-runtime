@@ -1,4 +1,4 @@
-import { ProgramDsl } from '../../../src/program/hybrid.d.ts'
+import { ProgramDsl } from './../../src/program/hybrid.d.ts'
 
 const node = (id: string) => {
     return { id, type: 'function', inputs: {}, pulseNext: {} }
