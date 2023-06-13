@@ -102,8 +102,8 @@ type ProcedureInputSpec = {
     allowLink?: boolean
     displayName?: string
     choices?: string[]
-    defaultType: TypedInputTypes
-    defaultValue: string | number | JSON | boolean
+    defaultType?: TypedInputTypes
+    defaultValue?: string | number | JSON | boolean
 }
 
 type ProcedureOutputSpec = {
