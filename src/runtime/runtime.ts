@@ -4,7 +4,7 @@ import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
 import { AxiosInstance } from '../../deps.ts'
 import { getAxiosInstance } from './axios.ts'
-import { ExecutionStatus, RuntimeInterface, SymbolMethods } from './runtime.d.ts'
+import { Context, ExecutionStatus, RuntimeInterface, SymbolMethods } from './runtime.d.ts'
 import { match, MatchFunction, pathToRegexp } from '../../deps.ts'
 import { RemoteStorage } from '../storage/remote.ts'
 // HEAD
@@ -13,6 +13,7 @@ import { LocalStorage } from '../storage/local.ts'
 //
 import { Program } from '../../mod.ts'
 import { LiteGraphSpec } from '../program/hybrid.d.ts'
+import { RuntimeContext } from './context.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
 //fp
@@ -92,6 +93,7 @@ export class Runtime implements RuntimeInterface {
     storage: Storage
     program: Program | null
     axiosInstance: AxiosInstance
+    context: Context
     dynamicRoutes: DynamicRoute[]
 
     constructor(props: RuntimeInitArgs) {
@@ -115,6 +117,8 @@ export class Runtime implements RuntimeInterface {
         this.program = null
         this.axiosInstance = getAxiosInstance(this)
         this.dynamicRoutes = []
+
+        this.context = new RuntimeContext()
 
         this.storage = new RemoteStorage({
             runtime: this,

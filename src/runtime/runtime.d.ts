@@ -24,6 +24,11 @@ export interface CommsInterface {
     send: (connectionId: string, msg: ConnMessage) => Promise<void>
 }
 
+export interface Context {
+    set: (key: string, data: unknown) => Promise<void>
+    get: (key: string, _default?: unknown) => Promise<unknown>
+}
+
 export interface RuntimeInterface {
     id: string
     mayaRuntimeToken: string
