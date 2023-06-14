@@ -86,7 +86,7 @@ export type LiteGraphNodeInput = {
     name: string
     type: string | number
     link: string | null | number
-    value?: string
+    value?: string | number | boolean | JSON
     label?: string
     linkType?: string
 }

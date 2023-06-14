@@ -99,7 +99,7 @@ export class Runnable {
         } else {
             fn = (val: any, portName?: string) => {
                 const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
-                destinations.forEach((destination) => {
+                destinations?.forEach((destination) => {
                     const pulseData: PulseEventDetail = {
                         pulse: val,
                         metadata: {
@@ -182,11 +182,15 @@ export class Runnable {
                         if (!_pulse) {
                             return resolve(null)
                         }
+                        // console.log('bruh pulse', field, _.get(_pulse, field.value), _pulse)
                         return resolve(_.get(_pulse, field.value))
                     })
             }
             default:
-                return async (_?: Record<string, any>) => field.value
+                return async (_?: Record<string, any>) => {
+                    console.log('bruh', field, this.dsl.type)
+                    return field.value
+                }
         }
     }
 
@@ -198,8 +202,12 @@ export class Runnable {
      * @returns The evaluated value of the input.
      */
     evaluateProperty(name: string, pulse?: Record<string, any>) {
+        console.log('type', this.dsl.type, 'got pulse', pulse)
         const evaluatePropertyFunc = this.getEvaluateSymbolFieldFunction(name)
-        return evaluatePropertyFunc(pulse)
+        const result = evaluatePropertyFunc(pulse)
+        // console.log('hey', _.get({ a: 1 }, 'a'))
+
+        return result
     }
 
     /**
