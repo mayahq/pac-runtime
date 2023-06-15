@@ -8,7 +8,7 @@ import { Context, ExecutionStatus, RuntimeInterface, SymbolMethods } from './run
 import { match, MatchFunction, pathToRegexp } from '../../deps.ts'
 import { RemoteStorage } from '../storage/remote.ts'
 // HEAD
-import { stdpath } from '../../test_deps.ts'
+import { stdpath } from '../../deps.ts'
 import { LocalStorage } from '../storage/local.ts'
 //
 import { Program } from '../../mod.ts'

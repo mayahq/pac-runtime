@@ -1,3 +1,4 @@
 dusnat*
 temp/*.json
 .DS_Store
+*.secret.*

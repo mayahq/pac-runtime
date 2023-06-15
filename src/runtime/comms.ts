@@ -67,7 +67,7 @@ export class Comms implements CommsInterface {
         message: MessageEvent<ConnMessage>,
         connection: WebSocket,
     ) {
-        await console.log(
+        console.log(
             'Received ws message',
             message.data,
             'from connection',

@@ -21,6 +21,7 @@ export class RemoteStorage implements Storage {
             method: 'get',
         })
         const data = response.data
+        console.log('Got program', JSON.stringify(data, null, 4))
         return data.program.dsl
     }
 

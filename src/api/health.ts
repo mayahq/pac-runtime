@@ -1,7 +1,6 @@
 import { Router } from '../../deps.ts'
-import { Runtime } from '../runtime/runtime.ts'
 
-function getHealthRouter(runtime: Runtime): Router {
+function getHealthRouter(): Router {
     const router = new Router()
     router.prefix('/health')
 
@@ -10,7 +9,6 @@ function getHealthRouter(runtime: Runtime): Router {
         ctx.response.body = {
             status: 'ok',
             timestamp: Date.now(),
-            info: runtime.infoSummary,
         }
     })
 

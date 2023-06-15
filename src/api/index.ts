@@ -14,7 +14,7 @@ function createBaseApp(runtime: Runtime) {
     app.use(programRouter.routes())
 
     // Health router
-    const healthRouter = getHealthRouter(runtime)
+    const healthRouter = getHealthRouter()
     app.use(healthRouter.allowedMethods())
     app.use(healthRouter.routes())
 

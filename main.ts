@@ -14,8 +14,6 @@ const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'STAGING')
 const autoShutdownBehaviour = getEnvVariableOrCrash('AUTO_SHUTDOWN_BEHAVIOUR', 'BY_LAST_USE')
 const maxIdleTime = getEnvVariableOrCrash('MAX_IDLE_TIME', '1800000')
 
-console.log('environment', environment)
-
 const runtime = new Runtime({
     id,
     mayaRuntimeToken,

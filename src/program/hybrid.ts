@@ -118,8 +118,6 @@ export class Runnable {
         }
 
         return (val: any, portName?: string) => {
-            // Run the procedure-done hooks
-            // console.log('pulseCallbackVal', val)
             this.baseProgram.hooks['onProcedureDone'].forEach((hook) => hook(val, this.dsl.id, portName))
             fn(val, portName)
         }
@@ -182,13 +180,11 @@ export class Runnable {
                         if (!_pulse) {
                             return resolve(null)
                         }
-                        // console.log('bruh pulse', field, _.get(_pulse, field.value), _pulse)
                         return resolve(_.get(_pulse, field.value))
                     })
             }
             default:
                 return async (_?: Record<string, any>) => {
-                    console.log('bruh', field, this.dsl.type)
                     return field.value
                 }
         }
@@ -202,12 +198,8 @@ export class Runnable {
      * @returns The evaluated value of the input.
      */
     evaluateProperty(name: string, pulse?: Record<string, any>) {
-        console.log('type', this.dsl.type, 'got pulse', pulse)
         const evaluatePropertyFunc = this.getEvaluateSymbolFieldFunction(name)
-        const result = evaluatePropertyFunc(pulse)
-        // console.log('hey', _.get({ a: 1 }, 'a'))
-
-        return result
+        return evaluatePropertyFunc(pulse)
     }
 
     /**

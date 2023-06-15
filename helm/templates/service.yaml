@@ -3,13 +3,14 @@ kind: Service
 metadata:
    # name: {{ include "pacruntime.fullname" . }}
    name: 'rt-{{ .Values.runtimeId }}'
-   namespace: { { .Values.namespace } }
-   labels: { { - include "pacruntime.labels" . | nindent 4 } }
+   namespace: {{ .Values.namespace }}
+   labels: 
+      {{- include "pacruntime.labels" . | nindent 4 }}
 spec:
-   type: { { .Values.service.type } }
+   type: {{ .Values.service.type }}
    ports:
-      - port: { { .Values.service.port } }
-        targetPort: { { .Values.service.targetPort } }
+      - port: {{ .Values.service.port }}
+        targetPort: {{ .Values.service.targetPort }}
         protocol: TCP
         name: http
-   selector: { { - include "pacruntime.selectorLabels" . | nindent 4 } }
+   selector: {{- include "pacruntime.selectorLabels" . | nindent 4 }}

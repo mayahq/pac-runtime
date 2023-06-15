@@ -19,7 +19,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "rt-{{ .Values.runtimeId }}.{{ .Values.ingress.domain }}"
+        - "rt-{{ .Values.runtimeId }}.{{ .Values.username }}{{ .Values.ingress.domain }}"
         - "*.{{ .Values.ingress.domain }}"
       secretName: {{ .Values.username }}-secret
   rules:
