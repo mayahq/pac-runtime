@@ -9,10 +9,14 @@ type RemoteStorageInitArgs = {
 export class RemoteStorage implements Storage {
     runtime: Runtime
     baseUrl: string
+    summary: any
 
     constructor({ runtime }: RemoteStorageInitArgs) {
         this.runtime = runtime
         this.baseUrl = runtime.appBackendBaseUrl
+        this.summary = {
+            baseUrl: runtime.appBackendBaseUrl
+        }
     }
 
     async get(workerId: string): Promise<LiteGraphSpec> {

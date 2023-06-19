@@ -19,11 +19,11 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "rt-{{ .Values.runtimeId }}.{{ .Values.username }}{{ .Values.ingress.domain }}"
-        - "*.{{ .Values.ingress.domain }}"
+        - "rt-{{ .Values.runtimeId }}.{{ .Values.username }}.{{ .Values.ingress.domain }}"
+        - "*.{{ .Values.username }}.{{ .Values.ingress.domain }}"
       secretName: {{ .Values.username }}-secret
   rules:
-    - host: "rt-{{ .Values.runtimeId }}.{{ .Values.ingress.domain }}"
+    - host: "rt-{{ .Values.runtimeId }}.{{ .Values.username }}.{{ .Values.ingress.domain }}"
       http:
         paths:
           - pathType: ImplementationSpecific

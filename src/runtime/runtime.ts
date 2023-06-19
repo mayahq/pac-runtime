@@ -146,7 +146,7 @@ export class Runtime implements RuntimeInterface {
             ownerId: this.ownerId,
             environment: this.environment,
             autoShutdown: this.autoShutdownBehaviour,
-            storage: this.storage,
+            storage: this.storage.summary,
         }
     }
 

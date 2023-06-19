@@ -8,9 +8,13 @@ type LocalStorageInitArgs = {
 
 export class LocalStorage implements Storage {
     basePath: string
+    summary: any
 
     constructor({ basePath }: LocalStorageInitArgs) {
         this.basePath = basePath
+        this.summary = {
+            basePath
+        }
     }
 
     async get(workerId: string) {
