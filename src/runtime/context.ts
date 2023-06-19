@@ -1,10 +1,14 @@
 import { Context } from './runtime.d.ts'
 
-export class RuntimeContext implements Context {
+export class InMemoryContext implements Context {
     store: Record<string, unknown>
 
-    constructor() {
-        this.store = {}
+    constructor(store?: Record<string, unknown>) {
+        if (store) {
+            this.store = store
+        } else {
+            this.store = {}
+        }
     }
 
     set: Context['set'] = async (key, data) => {
@@ -18,5 +22,9 @@ export class RuntimeContext implements Context {
         }
 
         return val
+    }
+
+    clone: Context['clone'] = () => {
+        return new InMemoryContext({ ...this.store })
     }
 }

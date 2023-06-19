@@ -27,6 +27,7 @@ export interface CommsInterface {
 export interface Context {
     set: (key: string, data: unknown) => Promise<void>
     get: (key: string, _default?: unknown) => Promise<unknown>
+    clone: () => Context
 }
 
 export interface RuntimeInterface {

@@ -3,6 +3,7 @@ import { Runtime } from '../runtime/runtime.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
 import { Runnable } from '../program/hybrid.ts'
 import { RunnableCallback } from '../program/hybrid.d.ts'
+import { Context } from '../runtime/runtime.d.ts'
 
 type SelfProperties = {
     name: string
@@ -93,6 +94,7 @@ class Symbol implements SymbolImpl {
 
     async _call(
         _runner: Runnable,
+        _ctx: Context,
         _callback: RunnableCallback,
         _pulse?: Record<string, any>,
     ) {
@@ -107,10 +109,11 @@ class Symbol implements SymbolImpl {
         const callback: RunnableCallback = (val: any, portName?: string) => {
             _callback({ ..._pulse, ...val }, portName)
         }
-        this.call(vals, callback, _pulse)
+        this.call(_ctx, vals, callback, _pulse)
     }
 
     async call(
+        _ctx: Context,
         _vals: Record<string, any>,
         _callback: RunnableCallback,
         _pulse?: Record<string, any>,

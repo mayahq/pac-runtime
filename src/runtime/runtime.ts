@@ -13,7 +13,7 @@ import { LocalStorage } from '../storage/local.ts'
 //
 import { Program } from '../../mod.ts'
 import { LiteGraphSpec } from '../program/hybrid.d.ts'
-import { RuntimeContext } from './context.ts'
+import { InMemoryContext } from './context.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
 //fp
@@ -118,7 +118,7 @@ export class Runtime implements RuntimeInterface {
         this.axiosInstance = getAxiosInstance(this)
         this.dynamicRoutes = []
 
-        this.context = new RuntimeContext()
+        this.context = new InMemoryContext()
 
         this.storage = new RemoteStorage({
             runtime: this,

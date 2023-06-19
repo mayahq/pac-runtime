@@ -1,3 +1,5 @@
+import { Context } from "../runtime/runtime.d.ts"
+
 type PrimitiveType = 'pulse' | 'flow' | 'global' | 'boolean' | 'number' | 'string' | 'json'
 
 type ProcedureRecursiveInput = {
@@ -43,7 +45,7 @@ type PulseLambdaOutput = {
 
 type PulseOutput = PulseProcedureInput | PulseLambdaOutput
 
-export type EvaluateFieldFunc = (args?: Record<string, any>, pulse?: Record<string, any>) => any
+export type EvaluateFieldFunc = (pulse?: Record<string, any>, ctx?: Context) => any
 
 export type PulseEventDetail = {
     pulse: Record<string, any>
@@ -52,6 +54,7 @@ export type PulseEventDetail = {
         timestamp: number
     }
     destination: string
+    context?: Context
 }
 
 export type Children = {
@@ -72,7 +75,7 @@ export type ProgramDsl = {
     procedures: Record<string, ProcedureDsl>
 }
 
-export type RunnableCallback = (val: any, portName?: string) => void
+export type RunnableCallback = (val: any, portName?: string, ctx?: Context) => void
 
 export type LiteGraphNodeOutput = {
     name: string

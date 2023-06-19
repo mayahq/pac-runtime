@@ -32,6 +32,8 @@ import {
     getProgramDsl,
     PortMap,
 } from './translate.ts'
+import { Context } from '../runtime/runtime.d.ts'
+import { InMemoryContext } from '../runtime/context.ts'
 
 type ProgramInitArgs = {
     dsl: ProgramDsl
@@ -92,12 +94,12 @@ export class Runnable {
      */
     private getPulseCallback(): RunnableCallback {
         const leafInputMap = this.baseProgram.leafInputMap[this.dsl.id]
-        let fn = (_val: any, _?: string) => {}
+        let fn = (_val: any, _?: string, _ctx?: Context) => {}
 
         if (!this.isLeafProcedure() || !leafInputMap) {
-            fn = (_val, _) => null
+            fn = (_val, _, _ctx) => null
         } else {
-            fn = (val: any, portName?: string) => {
+            fn = (val: any, portName?: string, ctx?: Context) => {
                 const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
                 destinations?.forEach((destination) => {
                     const pulseData: PulseEventDetail = {
@@ -107,6 +109,7 @@ export class Runnable {
                             timestamp: Date.now(),
                         },
                         destination: destination,
+                        context: ctx
                     }
                     const pulseEvent = new CustomEvent('pulse', {
                         detail: pulseData,
@@ -117,9 +120,9 @@ export class Runnable {
             }
         }
 
-        return (val: any, portName?: string) => {
+        return (val: any, portName?: string, ctx?: Context) => {
             this.baseProgram.hooks['onProcedureDone'].forEach((hook) => hook(val, this.dsl.id, portName))
-            fn(val, portName)
+            fn(val, portName, ctx)
         }
     }
 
@@ -150,7 +153,7 @@ export class Runnable {
                 }
 
                 // The upcoming symbol is a leaf symbol, we can just execute it and get back the result
-                return (_pulse?: Record<string, any>) => {
+                return (_pulse?: Record<string, any>, ctx?: Context) => {
                     return new Promise((resolve, reject) => {
                         this.fieldLocks.acquire(name, async (done: (e: Error | null, r: unknown) => void) => {
                             if (!field.id) {
@@ -160,7 +163,7 @@ export class Runnable {
                                 return done(null, _.get(this.symbolFieldVals[field.id], field.value))
                             } else {
                                 const runnable = this.baseProgram.getDeepRunnable(field.id)
-                                const result = await runnable.run()
+                                const result = await runnable.run(ctx)
                                 this.symbolFieldVals[field.id] = result
                                 const final = _.get(result, field.value)
                                 return done(null, final)
@@ -197,9 +200,9 @@ export class Runnable {
      * @param pulse Pulse received at time of evaluation.
      * @returns The evaluated value of the input.
      */
-    evaluateProperty(name: string, pulse?: Record<string, any>) {
+    evaluateProperty(name: string, pulse?: Record<string, any>, ctx?: Context) {
         const evaluatePropertyFunc = this.getEvaluateSymbolFieldFunction(name)
-        return evaluatePropertyFunc(pulse)
+        return evaluatePropertyFunc(pulse, ctx)
     }
 
     /**
@@ -231,10 +234,22 @@ export class Runnable {
      * Runs the `call` method of a procedure. For subflow evals, it will recursively
      * call itself for the children node connected to it's eval outputs.
      *
+     * @param ctx The execution context, unique to each execution
      * @param pulse The pulse received, if triggered by pulse.
      * @returns whatever the procedure passed to the callback in it's `call` method.
      */
-    async run(pulse?: Record<string, any>): Promise<any> {
+    async run(ctx?: Context, pulse?: Record<string, any>, ): Promise<any> {
+        if (!ctx) {
+            ctx = new InMemoryContext()
+        } else {
+            /**
+             * We want to shallow-clone the context before passing it on to a procedure, so that
+             * future modifications to the context do not affect the current procedure. To some
+             * degree, at least. Need to see if deep-cloning is viable.
+             */
+            ctx = ctx.clone()
+        }
+
         /**
          * Execute the symbol if its a leaf symbol
          */
@@ -247,12 +262,13 @@ export class Runnable {
                 if (pulse) {
                     resolve(1) // Don't need to wait for the procedure if this is pulse-based
                     callback = (val, port) => {
-                        this.sender(val, port)
+                        this.sender(val, port, ctx)
                     }
                 }
 
                 this.baseProgram.leafProcedures[this.dsl.id].instance._call(
                     this,
+                    ctx as unknown as Context, // smh
                     callback,
                     pulse,
                 )
@@ -287,7 +303,7 @@ export class Runnable {
                 parent: this,
                 baseProgram: this.baseProgram,
             })
-            return runnable.run()
+            return runnable.run(ctx)
         }))
     }
 }
@@ -560,7 +576,7 @@ export class Program {
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
-            const { pulse, destination } = data
+            const { pulse, destination, context } = data
 
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({
@@ -568,7 +584,7 @@ export class Program {
                 baseProgram: this,
                 parent: null,
             })
-            runnable.run(pulse)
+            runnable.run(context, pulse)
         }
         this.hub.addEventListener('pulse', listener)
     }
