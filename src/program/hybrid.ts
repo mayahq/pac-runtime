@@ -188,6 +188,9 @@ export class Runnable {
             }
             default:
                 return async (_?: Record<string, any>) => {
+                    if (field.type === 'json') {
+                        return JSON.parse(field.value as string)
+                    }
                     return field.value
                 }
         }
