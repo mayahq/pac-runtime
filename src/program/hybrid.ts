@@ -27,8 +27,7 @@ import {
     createLeafInputMap,
     createParentMap,
     getAllProcedures,
-    getFirstProcId,
-    getLastProcId,
+    guessEdgeProcIds,
     getProgramDsl,
     PortMap,
 } from './translate.ts'
@@ -381,11 +380,22 @@ export class Program {
         lastProcedureId?: string,
         timeout?: number,
     ): Promise<any> {
-        if (!firstProcedureId) {
-            firstProcedureId = getFirstProcId(spec)
-        }
-        if (!lastProcedureId) {
-            lastProcedureId = getLastProcId(spec)
+        if (!firstProcedureId || !lastProcedureId) {
+            const [guessedFirstProcId, guessedLastProcId] = guessEdgeProcIds(spec)
+            console.log('heh', guessedFirstProcId, guessedLastProcId)
+            if (!firstProcedureId) {
+                if (!guessedFirstProcId) {
+                    throw new Error('Unable to auto-determine first procedure ID.')
+                }
+                firstProcedureId = guessedFirstProcId
+            }
+
+            if (!lastProcedureId) {
+                if (!guessedLastProcId) {
+                    throw new Error('Unable to determine last procedure ID.')
+                }
+                lastProcedureId = guessedLastProcId
+            }
         }
 
         const program = Program.from(spec)
