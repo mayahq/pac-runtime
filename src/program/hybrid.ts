@@ -139,6 +139,12 @@ export class Runnable {
      */
     private getEvaluateSymbolFieldFunction(name: string): EvaluateFieldFunc {
         const field = this.getFieldSpec(name)
+        if (!field) {
+            const expectedInputs = Object.keys(this.dsl.inputs).join(', ')
+            throw new Error(
+                `No input found by name ${name} in procedure type ${this.dsl.type}. The expected inputs are: ${expectedInputs}`)
+        }
+
         switch (field.type) {
             case 'lambda_input': {
                 if (!field.portName) {
@@ -164,8 +170,12 @@ export class Runnable {
                                 const runnable = this.baseProgram.getDeepRunnable(field.id)
                                 const result = await runnable.run(ctx)
                                 this.symbolFieldVals[field.id] = result
-                                const final = _.get(result, field.value)
-                                return done(null, final)
+                                if (field.value) {
+                                    const final = _.get(result, field.value)
+                                    return done(null, final)
+                                } else {
+                                    return done(null, result)
+                                }
                             }
                         }, (e: Error | null, r: unknown) => {
                             if (e) {

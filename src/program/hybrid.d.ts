@@ -17,7 +17,7 @@ type TypedInput = {
 type LambdaInput = {
     type: 'lambda_input'
     portName: string
-    value: string
+    value?: string
 }
 
 type ProcedureInput = ProcedureRecursiveInput | TypedInput | LambdaInput
