@@ -1,3 +1,4 @@
+import { Program } from '../../mod.ts'
 import {
     Children,
     LiteGraphNode,
@@ -62,6 +63,17 @@ export function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]
     return res
 }
 
+// export function getSubflowInputMap(
+//     procs: ProcedureDsl[], 
+//     results: Record<string, string[]> = {}, 
+//     parent = '#'
+// ): Record<string, string[]> {
+//     for (const proc of procs) {
+//         if (proc.type )
+//     }
+//     return results
+// }
+
 /**
  * @param procs List of procedures
  * @param parent The parent that contains `procs` as children. Can be null.
@@ -73,7 +85,7 @@ export function createOutInMap(
     procs: ProcedureDsl[],
     parent: ProcedureDsl | null = null,
     soFar: Record<string, any> = {},
-): Record<string, Record<string, string[]>> {
+): PortMap {
     for (const proc of procs) {
         for (const portName in proc.pulseNext) {
             if (!soFar[proc.id]) {
@@ -118,6 +130,7 @@ export function createOutInMap(
 export function createLeafInputMap(program: ProgramDsl): PortMap {
     const topLevelProcList = Object.values(program.procedures)
     const outInMap = createOutInMap(topLevelProcList)
+    console.log('outInMap', outInMap)
     const allProcedures = getAllProcedures(topLevelProcList)
 
     const cache = {}

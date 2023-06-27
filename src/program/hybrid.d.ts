@@ -1,4 +1,5 @@
 import { Context } from "../runtime/runtime.d.ts"
+import { Runnable } from "./hybrid.ts"
 
 type PrimitiveType = 'pulse' | 'flow' | 'global' | 'boolean' | 'number' | 'string' | 'json'
 
@@ -52,6 +53,7 @@ export type PulseEventDetail = {
     metadata: {
         sender: string
         timestamp: number
+        parent: Runnable | null
     }
     destination: string
     context?: Context
