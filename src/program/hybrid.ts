@@ -85,7 +85,7 @@ export class Runnable {
     }
 
     /**
-     * Figures out which procedures to send the message next, based on it's
+     * Figures out which procedures to send the message next based on it's
      * output connections. Runs the `onProcedureDone` hooks before forwarding
      * the pulse.
      *
@@ -251,6 +251,8 @@ export class Runnable {
      * @returns whatever the procedure passed to the callback in it's `call` method.
      */
     async run(ctx?: Context, pulse?: Record<string, any>, ): Promise<any> {
+        console.log(`Running [${this.dsl.type}] ${this.dsl.id}`)
+
         if (!ctx) {
             ctx = new InMemoryContext()
         } else {
@@ -365,6 +367,9 @@ export class Program {
      */
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
+
+        console.log('dsl', JSON.stringify(dsl, null, 4))
+
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -601,6 +606,7 @@ export class Program {
             const data: PulseEventDetail = event.detail
             const { pulse, destination, context } = data
 
+            console.log('Received pulse for destination', destination)
             const destinationProcedure = this.leafProcedures[destination]
             const runnable = new Runnable({
                 dsl: destinationProcedure.dslRepresentation,
