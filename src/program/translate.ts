@@ -239,6 +239,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
             if (sourcePort.type === 'basepulse') {
                 children.pulseIn.push(destId)
             } else {
+                // The first input of a graph/input node contains the input name
                 destProc.inputs[destPort.name] = {
                     type: 'lambda_input',
                     portName: sourceNode.inputs![0].value as string,
@@ -246,16 +247,17 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else if (destNode.type === 'graph/output') {
-            if (sourcePort.type === 'basepulse') {
+            if (sourcePort.type === 'pulse') {
                 if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
                 }
+                // The first input of a graph/output node contains the output name
                 sourceProc.pulseNext[sourcePort.name].push({
                     type: 'lambda_output',
-                    portName: destNode.properties!.name,
+                    portName: destNode.inputs![0].value as string,
                 })
             } else {
-                children.outputs[destNode.properties!.name] = {
+                children.outputs[destPort.value as string] = {
                     portName: sourcePort.name,
                     procedureId: sourceId,
                 }

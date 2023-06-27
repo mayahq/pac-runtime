@@ -1,7 +1,6 @@
 {
   "version": "2",
   "remote": {
-    "https://deno.land/std@0.106.0/encoding/base64.ts": "eecae390f1f1d1cae6f6c6d732ede5276bf4b9cd29b1d281678c054dc5cc009e",
     "https://deno.land/std@0.185.0/_util/asserts.ts": "178dfc49a464aee693a7e285567b3d0b555dc805ff490505a8aae34f9cfb1462",
     "https://deno.land/std@0.185.0/_util/os.ts": "d932f56d41e4f6a6093d56044e29ce637f8dcc43c5a90af43504a889cf1775e3",
     "https://deno.land/std@0.185.0/async/deferred.ts": "42790112f36a75a57db4a96d33974a936deb7b04d25c6084a9fa8a49f135def8",
@@ -96,7 +95,6 @@
     "https://deno.land/std@0.186.0/collections/filter_values.ts": "5b9feaf17b9a6e5ffccdd36cf6f38fa4ffa94cff2602d381c2ad0c2a97929652",
     "https://deno.land/std@0.186.0/collections/without_all.ts": "a89f5da0b5830defed4f59666e188df411d8fece35a5f6ca69be6ca71a95c185",
     "https://deno.land/std@0.186.0/dotenv/mod.ts": "f5a8123741d1561ae8184a7f043bc097b15132c5171c651142b804b6dbc21853",
-    "https://deno.land/std@0.186.0/encoding/base64.ts": "144ae6234c1fbe5b68666c711dc15b1e9ee2aef6d42b3b4345bf9a6c91d70d0d",
     "https://deno.land/std@0.186.0/path/_constants.ts": "e49961f6f4f48039c0dfed3c3f93e963ca3d92791c9d478ac5b43183413136e0",
     "https://deno.land/std@0.186.0/path/_interface.ts": "6471159dfbbc357e03882c2266d21ef9afdb1e4aa771b0545e90db58a0ba314b",
     "https://deno.land/std@0.186.0/path/_util.ts": "d7abb1e0dea065f427b89156e28cdeb32b045870acdf865833ba808a73b576d0",
@@ -106,15 +104,6 @@
     "https://deno.land/std@0.186.0/path/posix.ts": "8b7c67ac338714b30c816079303d0285dd24af6b284f7ad63da5b27372a2c94d",
     "https://deno.land/std@0.186.0/path/separator.ts": "0fb679739d0d1d7bf45b68dacfb4ec7563597a902edbaf3c59b50d5bcadd93b1",
     "https://deno.land/std@0.186.0/path/win32.ts": "d186344e5583bcbf8b18af416d13d82b35a317116e6460a5a3953508c3de5bba",
-    "https://deno.land/x/canvas@v1.4.1/deps.ts": "e956026d98094946166e06d7b799290b732db015813870d84e04e33ab88e98f3",
-    "https://deno.land/x/canvas@v1.4.1/mod.ts": "a4e16972647ceafef58612a377a218372454c99d2c9da615a132694597114f80",
-    "https://deno.land/x/canvas@v1.4.1/src/base64.ts": "0928031fdba0c43b617154fbe2eb7578366460c04da1422933ae5e936d3d0349",
-    "https://deno.land/x/canvas@v1.4.1/src/canvas.ts": "58119999b04f68ebeed2627485c5c24c5b0c029707edde0b6568814f9049a3a8",
-    "https://deno.land/x/canvas@v1.4.1/src/canvaskit.ts": "c3d807472cbb3e1d9fc01bb43ff974ef796c4b010178d1595be5fa793cce5e7d",
-    "https://deno.land/x/canvas@v1.4.1/src/color_util.ts": "28f1072f0a5acbe7add7fac2f452311a47b44c080806fc4057de2d2e405c6c1c",
-    "https://deno.land/x/canvas@v1.4.1/src/lib.js": "bb21711589bfbc8997b455cdf53e3150e23289f3b44809188041b1d2fc7924fa",
-    "https://deno.land/x/canvas@v1.4.1/src/types.ts": "67d5800f8f4b0a407e0251676a03ae91b5f50a3ed53e6b72dc5984113cb93128",
-    "https://deno.land/x/canvas@v1.4.1/src/wasm.js": "449d72cc14fc4142a5853f944df49a744d852981d09c5515528ede8aebb0afda",
     "https://deno.land/x/cors@v1.2.2/abcCors.ts": "cdf83a7eaa69a1bf3ab910d18b9422217902fac47601adcaf0afac5a61845d48",
     "https://deno.land/x/cors@v1.2.2/attainCors.ts": "7d6aba0f942495cc31119604e0895c9bb8edd8f8baa7fe78e6c655bd0b4cbf59",
     "https://deno.land/x/cors@v1.2.2/cors.ts": "0e2d9167e3685f9bcf48f565e312b6e1883fa458f7337e5ce7bc2e3b29767980",
@@ -175,18 +164,9 @@
     "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/deps.ts": "200269eec46e80616f4eb32f6b0f9687e2aa485067a032f28de861ab63d12971",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/change/change.ts": "4d7e16019eb98c13fdedeb41b5e59a474d1c62fa91445e394b474200ece1c2d5",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/comparison/comparison.ts": "b478635cec5fae1f355780ce427db6d94dc85ea15477ea6764bc04f35dbd7721",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/debug/debug.ts": "741752916ba22262ec335d46e4f254a407b1db8ef1ea5a9d5ae6475390ed1d36",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/function/function.ts": "8b8a858010c2261d9af2815ae9a07d2d9bcbbf7dd9ed0c9ebba64c6e1768077c",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/inject/inject.ts": "facb25f352fae1741f744779dd6d035f24c9a8568bbcdd94a0c43b982ed3a4a6",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/loop/loop.ts": "0977ff4de0cacd67b7f66c95a58d6edf5ff8c2ac599aea0bc3d8660a1bfdc809",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/math_operation/math_operation.ts": "639a989673b59deda0e8305aeaef9deae47a3e82a82f8f38d42ce485e3bcea11",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/read_file/read_file.ts": "8a6e3c3241b1b84aef11210d19ac4a41715d42ee19eb7091b9ec8b55c572c4b4",
-    "https://raw.githubusercontent.com/mayahq/turtle/main/deps.ts": "c96e106ded41f1a50c2fd05bc2ab8df277352439755432c138f322204b81a230",
-    "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/move/move.ts": "524ba9fb654c37fc157d049e7d18a73f0fa9ab4007a682e2d9eb71bf54a334e7",
-    "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/pen_down/pen_down.ts": "5e6293e312085309c81e2972ef639967b0814ec664c84d2fc73749f864e69df3",
-    "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/render/canvas.ts": "2e4068268db33f5f1d32c612464a7e3295166bd77744817c541ab9381342a0ee",
-    "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/render/render.ts": "39b112acb90839c134ec388622397687664d6db92bc0c25c4f81d369a2dd87ed"
+    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/math_operation/math_operation.ts": "639a989673b59deda0e8305aeaef9deae47a3e82a82f8f38d42ce485e3bcea11"
   },
   "npm": {
     "specifiers": {
