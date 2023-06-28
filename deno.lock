@@ -183,6 +183,7 @@
     "https://raw.githubusercontent.com/mayahq/turtle/main/deps.ts": "c96e106ded41f1a50c2fd05bc2ab8df277352439755432c138f322204b81a230",
     "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/move/move.ts": "524ba9fb654c37fc157d049e7d18a73f0fa9ab4007a682e2d9eb71bf54a334e7",
     "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/pen_down/pen_down.ts": "5e6293e312085309c81e2972ef639967b0814ec664c84d2fc73749f864e69df3",
+    "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/pen_up/pen_up.ts": "1c54402a8109a7e818aaa63276d87291f5715ccabd087dba6523469721ce5e55",
     "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/render/canvas.ts": "2e4068268db33f5f1d32c612464a7e3295166bd77744817c541ab9381342a0ee",
     "https://raw.githubusercontent.com/mayahq/turtle/main/symbols/render/render.ts": "39b112acb90839c134ec388622397687664d6db92bc0c25c4f81d369a2dd87ed"
   },
