@@ -24,13 +24,10 @@ import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
 import {
-    createLeafInputMap,
     createParentMap,
     getAllProcedures,
     guessEdgeProcIds,
     getProgramDsl,
-    PortMap,
-createOutInMap,
 } from './translate.ts'
 import { Context } from '../runtime/runtime.d.ts'
 import { InMemoryContext } from '../runtime/context.ts'
@@ -103,7 +100,6 @@ export class Runnable {
 
     private forwardPulse(pulse: any, ctx?: Context, portName?: string) {
         const pulseOutputsForPort = portName ? this.dsl.pulseNext[portName] : Object.values(this.dsl.pulseNext)[0]
-        console.log(this.dsl.type, this.dsl.id, 'is forwarding pulse now', pulseOutputsForPort)
         if (!pulseOutputsForPort) {
             return
         }
@@ -262,8 +258,6 @@ export class Runnable {
      * @returns whatever the procedure passed to the callback in it's `call` method.
      */
     async run(ctx?: Context, pulse?: Record<string, any>, ): Promise<any> {
-        console.log(`Running [${this.dsl.type}] ${this.dsl.id}`)
-
         if (!ctx) {
             ctx = new InMemoryContext()
         } else {
@@ -353,11 +347,9 @@ export class Program {
     dsl: ProgramDsl
     leafProcedures: Record<string, LeafProcedureDef>
     allProcedures: Record<string, ProcedureDsl>
-    leafInputMap: PortMap
     parentMap: Record<string, string>
     liteGraphDsl?: LiteGraphSpec
     hooks: Record<ProgramEvent, ProgramHook[]>
-    outInMap: PortMap
 
     hub: EventTarget
     listener: EventListener
@@ -366,8 +358,6 @@ export class Program {
         this.dsl = dsl
 
         this.leafProcedures = {}
-        this.leafInputMap = createLeafInputMap(this.dsl)
-        this.outInMap = createOutInMap(Object.values(this.dsl.procedures))
 
         const procedureList = Object.values(this.dsl.procedures)
         this.parentMap = createParentMap(procedureList)
@@ -389,9 +379,6 @@ export class Program {
      */
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
-
-        console.log('dsl', JSON.stringify(dsl, null, 4))
-
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -419,7 +406,6 @@ export class Program {
     ): Promise<any> {
         if (!firstProcedureId || !lastProcedureId) {
             const [guessedFirstProcId, guessedLastProcId] = guessEdgeProcIds(spec)
-            console.log('heh', guessedFirstProcId, guessedLastProcId)
             if (!firstProcedureId) {
                 if (!guessedFirstProcId) {
                     throw new Error('Unable to auto-determine first procedure ID.')
@@ -628,7 +614,6 @@ export class Program {
             const data: PulseEventDetail = event.detail
             const { pulse, destination, context, metadata } = data
 
-            console.log('Received pulse for destination', destination)
             // const destinationProcedure = this.leafProcedures[destination]
             const destinationProcedureDsl = this.allProcedures[destination]
             const runnable = new Runnable({

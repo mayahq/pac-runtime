@@ -1,4 +1,3 @@
-import { Program } from '../../mod.ts'
 import {
     Children,
     LiteGraphNode,
