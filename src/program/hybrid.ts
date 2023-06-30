@@ -28,6 +28,8 @@ import {
     getAllProcedures,
     guessEdgeProcIds,
     getProgramDsl,
+expandAllFunctionsInChildren,
+expandProgramWithFunctions,
 } from './translate.ts'
 import { Context } from '../runtime/runtime.d.ts'
 import { InMemoryContext } from '../runtime/context.ts'
@@ -270,18 +272,23 @@ export class Runnable {
         }
 
         if (pulse) {
-            if (this.dsl.type === 'subflow') {
-                // Subflows are different
-                const nextProcIds = this.dsl.children?.pulseIn
-                if (!nextProcIds) {
+            try {
+                if (this.dsl.type === 'subflow' || this.dsl.type === 'function_instance') {
+                    // Subflows are different
+                    const nextProcIds = this.dsl.children?.pulseIn
+                    if (!nextProcIds) {
+                        return
+                    }
+    
+                    for (const procId of nextProcIds) {
+                        this.sendPulseToProcedure(procId, pulse, ctx, this)
+                    }
+    
                     return
                 }
-
-                for (const procId of nextProcIds) {
-                    this.sendPulseToProcedure(procId, pulse, ctx, this)
-                }
-
-                return
+            } catch (e) {
+                console.log('dsl hehe', JSON.stringify(this.parent!.dsl, null, 4))
+                throw e
             }
 
             /**
@@ -356,6 +363,9 @@ export class Program {
 
     constructor({ dsl }: ProgramInitArgs) {
         this.dsl = dsl
+        expandProgramWithFunctions(this.dsl)
+
+        console.log('expanded dsl', JSON.stringify(this.dsl, null, 4))
 
         this.leafProcedures = {}
 
@@ -379,6 +389,7 @@ export class Program {
      */
     static from(spec: LiteGraphSpec): Program {
         const dsl = getProgramDsl(spec)
+        console.log('da dsl', dsl)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -615,6 +626,7 @@ export class Program {
             const { pulse, destination, context, metadata } = data
 
             // const destinationProcedure = this.leafProcedures[destination]
+            console.log('SENDING MESSAGE TO', destination)
             const destinationProcedureDsl = this.allProcedures[destination]
             const runnable = new Runnable({
                 dsl: destinationProcedureDsl,

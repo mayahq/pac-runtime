@@ -71,10 +71,14 @@ export type ProcedureDsl = {
     inputs: Record<string, ProcedureInput> // Map of inputs. These can be extracted from the pulse or can be of type eval.
     pulseNext: Record<string, PulseOutput[]> // Map of list of procedures that the corresponding pulse output connects to.
     children?: Children
+    function?: string // ID of the function that this procedure is a representation of
 }
 
+export type ProcedureMap = Record<string, ProcedureDsl>
+
 export type ProgramDsl = {
-    procedures: Record<string, ProcedureDsl>
+    procedures: ProcedureMap
+    functions?: ProcedureMap
 }
 
 export type RunnableCallback = (val: any, portName?: string, ctx?: Context) => void
@@ -109,6 +113,7 @@ export interface LiteGraphNode {
     properties?: Record<string, any>
     subgraph?: LiteGraphSpec
     boxcolor?: string
+    function?: string
 }
 
 /**
@@ -124,6 +129,7 @@ type LiteGraphLinks = (number | string)[][]
 export type LiteGraphSpec = {
     nodes: LiteGraphNode[]
     links: LiteGraphLinks
+    functions?: Record<string, LiteGraphNode>
     last_node_id?: number
     last_link_id?: number
     groups?: any[]
