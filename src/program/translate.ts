@@ -64,17 +64,6 @@ export function getLeafInputs(proc: ProcedureDsl, cache: Record<string, string[]
     return res
 }
 
-// export function getSubflowInputMap(
-//     procs: ProcedureDsl[], 
-//     results: Record<string, string[]> = {}, 
-//     parent = '#'
-// ): Record<string, string[]> {
-//     for (const proc of procs) {
-//         if (proc.type )
-//     }
-//     return results
-// }
-
 /**
  * @param procs List of procedures
  * @param parent The parent that contains `procs` as children. Can be null.
@@ -262,6 +251,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else if (destNode.type === 'graph/output') {
+            console.log('here', sourcePort, destNode)
             if (sourcePort.type === 'pulse') {
                 if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []

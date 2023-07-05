@@ -12,3 +12,4 @@ export type { MatchFunction } from 'npm:path-to-regexp'
 import { AxiosInstance as AInstance } from 'npm:axios'
 export type AxiosInstance = AInstance
 export { default as AsyncLock } from 'npm:async-lock'
+export { default as jsondiffpatch } from 'npm:jsondiffpatch'

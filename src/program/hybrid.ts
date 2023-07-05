@@ -388,6 +388,7 @@ export class Program {
      * @returns Program instance that can be deployed and run.
      */
     static from(spec: LiteGraphSpec): Program {
+        console.log('da spec', spec)
         const dsl = getProgramDsl(spec)
         console.log('da dsl', dsl)
         const program = new Program({ dsl })

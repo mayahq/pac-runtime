@@ -1,4 +1,4 @@
-import { Application, Router, RouterContext } from '../../deps.ts'
+import { Application, Router, RouterContext, jsondiffpatch } from '../../deps.ts'
 import { Comms } from './comms.ts'
 import { Storage } from '../storage/typings.d.ts'
 import createBaseApp from '../api/index.ts'
@@ -204,6 +204,12 @@ export class Runtime implements RuntimeInterface {
         if (saveToStorage) {
             await this.storage.set(this.id, liteGraphDsl)
         }
+
+        const patch = jsondiffpatch.diff(this.program?.liteGraphDsl, liteGraphDsl)
+        this.comms.broadcast({
+            event: 'programUpdate',
+            data: { patch }
+        })
         this.program = program
     }
 }
