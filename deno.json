@@ -1,23 +1,23 @@
 {
-	"tasks": {
-		"dev": "deno run --watch --allow-all --reload=https://raw.githubusercontent.com --lock=deno.lock --lock-write local.ts",
-		"run": "deno run --allow-all --reload=https://raw.githubusercontent.com --lock=deno.lock --lock-write main.ts",
-		"test": "deno test tests --allow-all --reload=https://raw.githubusercontent.com --quiet --lock=deno.lock --lock-write",
-		"push_image": "./scripts/push_to_ecr.sh",
-		"deploy_testbed": "helm uninstall pac-runtime && helm install pac-runtime ./helm -f ./helm/values.secret.yaml"
-	},
-	"fmt": {
-		"indentWidth": 4,
-		"singleQuote": true,
-		"semiColons": false,
-		"lineWidth": 120,
-		"files": {
-			"exclude": ["*.yaml"]
-		}
-	},
-	"lint": {
-		"rules": {
-			"exclude": ["require-await", "no-explicit-any"]
-		}
-	}
+    "tasks": {
+        "dev": "deno run --watch --allow-all --reload=https://raw.githubusercontent.com --lock=deno.lock --lock-write local.ts",
+        "run": "deno run --allow-all --reload=https://raw.githubusercontent.com --lock=deno.lock --lock-write main.ts",
+        "test": "deno test tests --allow-all --reload=https://raw.githubusercontent.com --quiet --lock=deno.lock --lock-write",
+        "push_image": "./scripts/push_to_ecr.sh",
+        "deploy_testbed": "helm uninstall pac-runtime && helm install pac-runtime ./helm -f ./helm/values.secret.yaml"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "singleQuote": true,
+        "semiColons": false,
+        "lineWidth": 120,
+        "files": {
+            "exclude": ["*.yaml"]
+        }
+    },
+    "lint": {
+        "rules": {
+            "exclude": ["require-await", "no-explicit-any"]
+        }
+    }
 }

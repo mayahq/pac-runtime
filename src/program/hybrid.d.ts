@@ -1,4 +1,5 @@
-import { Context } from "../runtime/runtime.d.ts"
+import { Context } from '../runtime/runtime.d.ts'
+import { Runnable } from './hybrid.ts'
 
 type PrimitiveType = 'pulse' | 'flow' | 'global' | 'boolean' | 'number' | 'string' | 'json'
 
@@ -17,7 +18,7 @@ type TypedInput = {
 type LambdaInput = {
     type: 'lambda_input'
     portName: string
-    value: string
+    value?: string
 }
 
 type ProcedureInput = ProcedureRecursiveInput | TypedInput | LambdaInput
@@ -52,6 +53,7 @@ export type PulseEventDetail = {
     metadata: {
         sender: string
         timestamp: number
+        parent: Runnable | null
     }
     destination: string
     context?: Context
@@ -69,10 +71,14 @@ export type ProcedureDsl = {
     inputs: Record<string, ProcedureInput> // Map of inputs. These can be extracted from the pulse or can be of type eval.
     pulseNext: Record<string, PulseOutput[]> // Map of list of procedures that the corresponding pulse output connects to.
     children?: Children
+    function?: string // ID of the function that this procedure is a representation of
 }
 
+export type ProcedureMap = Record<string, ProcedureDsl>
+
 export type ProgramDsl = {
-    procedures: Record<string, ProcedureDsl>
+    procedures: ProcedureMap
+    functions?: ProcedureMap
 }
 
 export type RunnableCallback = (val: any, portName?: string, ctx?: Context) => void
@@ -92,6 +98,7 @@ export type LiteGraphNodeInput = {
     value?: string | number | boolean | JSON
     label?: string
     linkType?: string
+    linkTo?: string
 }
 
 export interface LiteGraphNode {
@@ -106,6 +113,7 @@ export interface LiteGraphNode {
     properties?: Record<string, any>
     subgraph?: LiteGraphSpec
     boxcolor?: string
+    function?: string
 }
 
 /**
@@ -121,6 +129,7 @@ type LiteGraphLinks = (number | string)[][]
 export type LiteGraphSpec = {
     nodes: LiteGraphNode[]
     links: LiteGraphLinks
+    functions?: Record<string, LiteGraphNode>
     last_node_id?: number
     last_link_id?: number
     groups?: any[]

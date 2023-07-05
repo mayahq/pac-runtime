@@ -24,13 +24,11 @@ import { isUrl } from '../utils/misc.ts'
 import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
 import {
-    createLeafInputMap,
     createParentMap,
+    expandProgramWithFunctions,
     getAllProcedures,
-    getFirstProcId,
-    getLastProcId,
     getProgramDsl,
-    PortMap,
+    guessEdgeProcIds,
 } from './translate.ts'
 import { Context } from '../runtime/runtime.d.ts'
 import { InMemoryContext } from '../runtime/context.ts'
@@ -77,52 +75,60 @@ export class Runnable {
         this.sender = this.getPulseCallback()
     }
 
-    private isLeafProcedure() {
-        return !!this.baseProgram.leafProcedures[this.dsl.id]
-    }
-
     private getFieldSpec(name: string) {
         return this.dsl.inputs[name]
     }
 
+    private sendPulseToProcedure(procId: string, pulse: any, ctx?: Context, parent: Runnable | null = null) {
+        const pulseData: PulseEventDetail = {
+            pulse: pulse,
+            metadata: {
+                sender: this.dsl.id,
+                timestamp: Date.now(),
+                parent: parent,
+            },
+            destination: procId,
+            context: ctx,
+        }
+
+        const pulseEvent = new CustomEvent('pulse', {
+            detail: pulseData,
+        })
+
+        this.baseProgram.hub.dispatchEvent(pulseEvent)
+    }
+
+    private forwardPulse(pulse: any, ctx?: Context, portName?: string) {
+        const pulseOutputsForPort = portName ? this.dsl.pulseNext[portName] : Object.values(this.dsl.pulseNext)[0]
+        if (!pulseOutputsForPort) {
+            return
+        }
+
+        for (const pulseOutput of pulseOutputsForPort) {
+            if (pulseOutput.type === 'procedure_input') {
+                this.sendPulseToProcedure(
+                    pulseOutput.procedureId,
+                    pulse,
+                    ctx,
+                    this.parent,
+                )
+            } else {
+                this.parent?.forwardPulse(pulse, ctx, pulseOutput.portName)
+            }
+        }
+    }
+
     /**
-     * Figures out which procedures to send the message next, based on it's
+     * Figures out which procedures to send the message next based on it's
      * output connections. Runs the `onProcedureDone` hooks before forwarding
      * the pulse.
      *
      * @returns a function that asks the hub to forward the pulse to said procedures.
      */
     private getPulseCallback(): RunnableCallback {
-        const leafInputMap = this.baseProgram.leafInputMap[this.dsl.id]
-        let fn = (_val: any, _?: string, _ctx?: Context) => {}
-
-        if (!this.isLeafProcedure() || !leafInputMap) {
-            fn = (_val, _, _ctx) => null
-        } else {
-            fn = (val: any, portName?: string, ctx?: Context) => {
-                const destinations = portName ? leafInputMap[portName] : Object.values(leafInputMap)[0]
-                destinations?.forEach((destination) => {
-                    const pulseData: PulseEventDetail = {
-                        pulse: val,
-                        metadata: {
-                            sender: this.dsl.id,
-                            timestamp: Date.now(),
-                        },
-                        destination: destination,
-                        context: ctx
-                    }
-                    const pulseEvent = new CustomEvent('pulse', {
-                        detail: pulseData,
-                    })
-
-                    this.baseProgram.hub.dispatchEvent(pulseEvent)
-                })
-            }
-        }
-
         return (val: any, portName?: string, ctx?: Context) => {
             this.baseProgram.hooks['onProcedureDone'].forEach((hook) => hook(val, this.dsl.id, portName))
-            fn(val, portName, ctx)
+            this.forwardPulse(val, ctx, portName)
         }
     }
 
@@ -140,6 +146,13 @@ export class Runnable {
      */
     private getEvaluateSymbolFieldFunction(name: string): EvaluateFieldFunc {
         const field = this.getFieldSpec(name)
+        if (!field) {
+            const expectedInputs = Object.keys(this.dsl.inputs).join(', ')
+            throw new Error(
+                `No input found by name ${name} in procedure type ${this.dsl.type}. The expected inputs are: ${expectedInputs}`,
+            )
+        }
+
         switch (field.type) {
             case 'lambda_input': {
                 if (!field.portName) {
@@ -165,8 +178,12 @@ export class Runnable {
                                 const runnable = this.baseProgram.getDeepRunnable(field.id)
                                 const result = await runnable.run(ctx)
                                 this.symbolFieldVals[field.id] = result
-                                const final = _.get(result, field.value)
-                                return done(null, final)
+                                if (field.value) {
+                                    const final = _.get(result, field.value)
+                                    return done(null, final)
+                                } else {
+                                    return done(null, result)
+                                }
                             }
                         }, (e: Error | null, r: unknown) => {
                             if (e) {
@@ -241,7 +258,7 @@ export class Runnable {
      * @param pulse The pulse received, if triggered by pulse.
      * @returns whatever the procedure passed to the callback in it's `call` method.
      */
-    async run(ctx?: Context, pulse?: Record<string, any>, ): Promise<any> {
+    async run(ctx?: Context, pulse?: Record<string, any>): Promise<any> {
         if (!ctx) {
             ctx = new InMemoryContext()
         } else {
@@ -253,38 +270,51 @@ export class Runnable {
             ctx = ctx.clone()
         }
 
-        /**
-         * Execute the symbol if its a leaf symbol
-         */
-        if (this.baseProgram.leafProcedures[this.dsl.id]) {
-            const val = await new Promise((resolve) => {
-                let callback: RunnableCallback = (val, _) => {
-                    this.baseProgram.hooks['onProcedureDone'].forEach((fn) => fn(val, this.dsl.id))
-                    resolve(val)
-                }
-                if (pulse) {
-                    resolve(1) // Don't need to wait for the procedure if this is pulse-based
-                    callback = (val, port) => {
-                        this.sender(val, port, ctx)
-                    }
-                }
-
-                this.baseProgram.leafProcedures[this.dsl.id].instance._call(
-                    this,
-                    ctx as unknown as Context, // smh
-                    callback,
-                    pulse,
-                )
-            })
-            return val
-        }
-
-        /**
-         * A pulse can only ever be sent to a leaf procedure's input, and
-         * never a subflow input.
-         */
         if (pulse) {
-            throw new Error(`Pulse sent to subflow input: ${this.dsl.id}`)
+            try {
+                if (this.dsl.type === 'subflow' || this.dsl.type === 'function_instance') {
+                    // Subflows are different
+                    const nextProcIds = this.dsl.children?.pulseIn
+                    if (!nextProcIds) {
+                        return
+                    }
+
+                    for (const procId of nextProcIds) {
+                        this.sendPulseToProcedure(procId, pulse, ctx, this)
+                    }
+
+                    return
+                }
+            } catch (e) {
+                console.log('dsl hehe', JSON.stringify(this.parent!.dsl, null, 4))
+                throw e
+            }
+
+            /**
+             * Execute the symbol if its a leaf symbol
+             */
+            if (this.baseProgram.leafProcedures[this.dsl.id]) {
+                const val = await new Promise((resolve) => {
+                    let callback: RunnableCallback = (val, _) => {
+                        this.baseProgram.hooks['onProcedureDone'].forEach((fn) => fn(val, this.dsl.id))
+                        resolve(val)
+                    }
+                    if (pulse) {
+                        resolve(1) // Don't need to wait for the procedure if this is pulse-based
+                        callback = (val, port) => {
+                            this.sender(val, port, ctx)
+                        }
+                    }
+
+                    this.baseProgram.leafProcedures[this.dsl.id].instance._call(
+                        this,
+                        ctx as unknown as Context, // smh
+                        callback,
+                        pulse,
+                    )
+                })
+                return val
+            }
         }
 
         /**
@@ -322,7 +352,6 @@ export class Program {
     dsl: ProgramDsl
     leafProcedures: Record<string, LeafProcedureDef>
     allProcedures: Record<string, ProcedureDsl>
-    leafInputMap: PortMap
     parentMap: Record<string, string>
     liteGraphDsl?: LiteGraphSpec
     hooks: Record<ProgramEvent, ProgramHook[]>
@@ -332,9 +361,11 @@ export class Program {
 
     constructor({ dsl }: ProgramInitArgs) {
         this.dsl = dsl
+        expandProgramWithFunctions(this.dsl)
+
+        console.log('expanded dsl', JSON.stringify(this.dsl, null, 4))
 
         this.leafProcedures = {}
-        this.leafInputMap = createLeafInputMap(this.dsl)
 
         const procedureList = Object.values(this.dsl.procedures)
         this.parentMap = createParentMap(procedureList)
@@ -355,7 +386,9 @@ export class Program {
      * @returns Program instance that can be deployed and run.
      */
     static from(spec: LiteGraphSpec): Program {
+        console.log('The spec', spec)
         const dsl = getProgramDsl(spec)
+        console.log('The dsl', dsl)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -381,11 +414,21 @@ export class Program {
         lastProcedureId?: string,
         timeout?: number,
     ): Promise<any> {
-        if (!firstProcedureId) {
-            firstProcedureId = getFirstProcId(spec)
-        }
-        if (!lastProcedureId) {
-            lastProcedureId = getLastProcId(spec)
+        if (!firstProcedureId || !lastProcedureId) {
+            const [guessedFirstProcId, guessedLastProcId] = guessEdgeProcIds(spec)
+            if (!firstProcedureId) {
+                if (!guessedFirstProcId) {
+                    throw new Error('Unable to auto-determine first procedure ID.')
+                }
+                firstProcedureId = guessedFirstProcId
+            }
+
+            if (!lastProcedureId) {
+                if (!guessedLastProcId) {
+                    throw new Error('Unable to determine last procedure ID.')
+                }
+                lastProcedureId = guessedLastProcId
+            }
         }
 
         const program = Program.from(spec)
@@ -579,13 +622,15 @@ export class Program {
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
             const data: PulseEventDetail = event.detail
-            const { pulse, destination, context } = data
+            const { pulse, destination, context, metadata } = data
 
-            const destinationProcedure = this.leafProcedures[destination]
+            // const destinationProcedure = this.leafProcedures[destination]
+            console.log('SENDING MESSAGE TO', destination)
+            const destinationProcedureDsl = this.allProcedures[destination]
             const runnable = new Runnable({
-                dsl: destinationProcedure.dslRepresentation,
+                dsl: destinationProcedureDsl,
                 baseProgram: this,
-                parent: null,
+                parent: metadata.parent,
             })
             runnable.run(context, pulse)
         }
