@@ -120,7 +120,6 @@ export function createOutInMap(
 export function createLeafInputMap(program: ProgramDsl): PortMap {
     const topLevelProcList = Object.values(program.procedures)
     const outInMap = createOutInMap(topLevelProcList)
-    console.log('outInMap', outInMap)
     const allProcedures = getAllProcedures(topLevelProcList)
 
     const cache = {}
@@ -251,7 +250,6 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
                 }
             }
         } else if (destNode.type === 'graph/output') {
-            console.log('here', sourcePort, destNode)
             if (sourcePort.type === 'pulse') {
                 if (!sourceProc.pulseNext[sourcePort.name]) {
                     sourceProc.pulseNext[sourcePort.name] = []
