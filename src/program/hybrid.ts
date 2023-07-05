@@ -25,11 +25,10 @@ import Symbol from '../symbol/symbol.ts'
 import { AsyncLock, lodash as _ } from '../../deps.ts'
 import {
     createParentMap,
+    expandProgramWithFunctions,
     getAllProcedures,
-    guessEdgeProcIds,
     getProgramDsl,
-expandAllFunctionsInChildren,
-expandProgramWithFunctions,
+    guessEdgeProcIds,
 } from './translate.ts'
 import { Context } from '../runtime/runtime.d.ts'
 import { InMemoryContext } from '../runtime/context.ts'
@@ -86,33 +85,32 @@ export class Runnable {
             metadata: {
                 sender: this.dsl.id,
                 timestamp: Date.now(),
-                parent: parent
+                parent: parent,
             },
             destination: procId,
-            context: ctx
+            context: ctx,
         }
 
         const pulseEvent = new CustomEvent('pulse', {
-            detail: pulseData
+            detail: pulseData,
         })
 
         this.baseProgram.hub.dispatchEvent(pulseEvent)
     }
-
 
     private forwardPulse(pulse: any, ctx?: Context, portName?: string) {
         const pulseOutputsForPort = portName ? this.dsl.pulseNext[portName] : Object.values(this.dsl.pulseNext)[0]
         if (!pulseOutputsForPort) {
             return
         }
-        
+
         for (const pulseOutput of pulseOutputsForPort) {
             if (pulseOutput.type === 'procedure_input') {
                 this.sendPulseToProcedure(
                     pulseOutput.procedureId,
                     pulse,
                     ctx,
-                    this.parent
+                    this.parent,
                 )
             } else {
                 this.parent?.forwardPulse(pulse, ctx, pulseOutput.portName)
@@ -151,7 +149,8 @@ export class Runnable {
         if (!field) {
             const expectedInputs = Object.keys(this.dsl.inputs).join(', ')
             throw new Error(
-                `No input found by name ${name} in procedure type ${this.dsl.type}. The expected inputs are: ${expectedInputs}`)
+                `No input found by name ${name} in procedure type ${this.dsl.type}. The expected inputs are: ${expectedInputs}`,
+            )
         }
 
         switch (field.type) {
@@ -259,7 +258,7 @@ export class Runnable {
      * @param pulse The pulse received, if triggered by pulse.
      * @returns whatever the procedure passed to the callback in it's `call` method.
      */
-    async run(ctx?: Context, pulse?: Record<string, any>, ): Promise<any> {
+    async run(ctx?: Context, pulse?: Record<string, any>): Promise<any> {
         if (!ctx) {
             ctx = new InMemoryContext()
         } else {
@@ -279,11 +278,11 @@ export class Runnable {
                     if (!nextProcIds) {
                         return
                     }
-    
+
                     for (const procId of nextProcIds) {
                         this.sendPulseToProcedure(procId, pulse, ctx, this)
                     }
-    
+
                     return
                 }
             } catch (e) {
@@ -306,7 +305,7 @@ export class Runnable {
                             this.sender(val, port, ctx)
                         }
                     }
-    
+
                     this.baseProgram.leafProcedures[this.dsl.id].instance._call(
                         this,
                         ctx as unknown as Context, // smh
@@ -316,7 +315,6 @@ export class Runnable {
                 })
                 return val
             }
-
         }
 
         /**
@@ -388,9 +386,9 @@ export class Program {
      * @returns Program instance that can be deployed and run.
      */
     static from(spec: LiteGraphSpec): Program {
-        console.log('da spec', spec)
+        console.log('The spec', spec)
         const dsl = getProgramDsl(spec)
-        console.log('da dsl', dsl)
+        console.log('The dsl', dsl)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program

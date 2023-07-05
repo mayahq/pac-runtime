@@ -15,7 +15,7 @@ export class RemoteStorage implements Storage {
         this.runtime = runtime
         this.baseUrl = runtime.appBackendBaseUrl
         this.summary = {
-            baseUrl: runtime.appBackendBaseUrl
+            baseUrl: runtime.appBackendBaseUrl,
         }
     }
 

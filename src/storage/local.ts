@@ -13,7 +13,7 @@ export class LocalStorage implements Storage {
     constructor({ basePath }: LocalStorageInitArgs) {
         this.basePath = basePath
         this.summary = {
-            basePath
+            basePath,
         }
     }
 

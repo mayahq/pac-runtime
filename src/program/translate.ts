@@ -203,7 +203,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
             type: node.type,
             inputs: {},
             pulseNext: {},
-            function: node.function
+            function: node.function,
         }
 
         node.inputs?.forEach((input) => {
@@ -297,7 +297,7 @@ function getChildren(lNode: LiteGraphNode): Children | undefined {
 export function getProgramDsl(graph: LiteGraphSpec): ProgramDsl {
     const program: ProgramDsl = {
         procedures: {},
-        functions: {}
+        functions: {},
     }
     const lNode: LiteGraphNode = {
         id: 0,
@@ -311,15 +311,14 @@ export function getProgramDsl(graph: LiteGraphSpec): ProgramDsl {
     const children = getChildren(lNode)
     program.procedures = children!.procedures
 
-
     if (graph.functions) {
         const dummyProgram = {
             id: 2,
             type: 'baseFunc',
             subgraph: {
                 nodes: Object.values(graph.functions),
-                links: []
-            }
+                links: [],
+            },
         }
 
         const children = getChildren(dummyProgram)
@@ -335,13 +334,13 @@ function addPrefxToChildrenIds(children: Children, prefix: string) {
     for (const i in children!.pulseIn) {
         children!.pulseIn[i] = `${prefix}::${children!.pulseIn[i]}`
     }
-    Object.keys(children!.outputs).forEach(outputPortName => {
+    Object.keys(children!.outputs).forEach((outputPortName) => {
         const outputProcId = children!.outputs[outputPortName].procedureId
         children!.outputs[outputPortName].procedureId = `${prefix}::${outputProcId}`
     })
 
-    Object.keys(procs).forEach(procId => {
-        Object.keys(procs[procId].inputs).forEach(inputName => {
+    Object.keys(procs).forEach((procId) => {
+        Object.keys(procs[procId].inputs).forEach((inputName) => {
             if (procs[procId].inputs[inputName].type !== 'procedure') {
                 return
             }
@@ -350,7 +349,7 @@ function addPrefxToChildrenIds(children: Children, prefix: string) {
             procs[procId].inputs[inputName].value = newId
         })
 
-        Object.keys(procs[procId].pulseNext).forEach(portName => {
+        Object.keys(procs[procId].pulseNext).forEach((portName) => {
             for (const idx in procs[procId].pulseNext[portName]) {
                 const output = procs[procId].pulseNext[portName][idx]
                 if (output.type === 'procedure_input') {
@@ -372,8 +371,8 @@ function addPrefxToChildrenIds(children: Children, prefix: string) {
 }
 
 export function populateFunctionInstance(
-    proc: ProcedureDsl, 
-    functions: ProcedureMap
+    proc: ProcedureDsl,
+    functions: ProcedureMap,
 ) {
     if (proc.type !== 'function_instance') {
         return
@@ -382,8 +381,8 @@ export function populateFunctionInstance(
     const functionId = proc.function
     if (!functionId) {
         throw new Error('No function reference found on function_instance procedure')
-    } 
-    
+    }
+
     const functionBody = functions[functionId]
     if (!functionBody) {
         throw new Error(`Invalid function reference. No function found with ID ${functionId}`)
@@ -397,10 +396,10 @@ export function populateFunctionInstance(
 
 export function expandAllFunctionsInChildren(
     children: Children,
-    functions: ProcedureMap
+    functions: ProcedureMap,
 ) {
     const procs = children.procedures
-    Object.keys(children.procedures).forEach(procId => {
+    Object.keys(children.procedures).forEach((procId) => {
         if (procs[procId].type === 'function_instance') {
             populateFunctionInstance(procs[procId], functions)
         }
@@ -408,7 +407,7 @@ export function expandAllFunctionsInChildren(
         if (procs[procId].children) {
             expandAllFunctionsInChildren(
                 procs[procId].children!,
-                functions
+                functions,
             )
         }
     })
@@ -418,16 +417,15 @@ export function expandProgramWithFunctions(program: ProgramDsl) {
     const children: Children = {
         procedures: program.procedures,
         pulseIn: [],
-        outputs: {}
+        outputs: {},
     }
 
     expandAllFunctionsInChildren(children, program.functions || {})
 }
 
-
 /**
  * Finds the ID of the first and the last procedures
- * 
+ *
  * @param graph The program in LiteGraph form
  * @returns The IDs of the starting and ending procedure
  */
@@ -438,7 +436,6 @@ export function guessEdgeProcIds(graph: LiteGraphSpec): (string | null)[] {
 
     const procIdsWithPulseInput: Record<string, boolean> = {}
     const procIdsWithPulseOutput: Record<string, boolean> = {}
-
 
     for (const link of links) {
         const sourceNode = nodeMap[link[1].toString()]

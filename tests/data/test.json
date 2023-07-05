@@ -1,149 +1,149 @@
 {
-	"nodes": [
-		{
-			"id": 1,
-			"type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
-			"inputs": [
-				{
-					"name": "body",
-					"type": "string",
-					"value": "return { output: { myValue: 3 } }",
-					"link": null
-				},
-				{
-					"name": "input",
-					"type": "string",
-					"value": "",
-					"link": null
-				},
-				{
-					"name": "pulse",
-					"type": "basepulse",
-					"link": null
-				}
-			],
-			"outputs": [
-				{
-					"name": "result",
-					"type": "eval",
-					"linkType": "eval"
-				},
-				{
-					"name": "pulseOut",
-					"type": "basepulse",
-					"linkType": "pulse"
-				}
-			]
-		},
-		{
-			"id": 2,
-			"type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
-			"inputs": [
-				{
-					"name": "body",
-					"type": "string",
-					"value": "return { output: { myValue: input * 6 } }",
-					"link": null
-				},
-				{
-					"name": "input",
-					"type": "procedure",
-					"value": "output.myValue",
-					"link": null
-				},
-				{
-					"name": "pulse",
-					"type": "basepulse",
-					"link": null
-				}
-			],
-			"outputs": [
-				{
-					"name": "result",
-					"type": "eval",
-					"linkType": "eval"
-				},
-				{
-					"name": "pulseOut",
-					"type": "basepulse",
-					"linkType": "pulse"
-				}
-			]
-		},
-		{
-			"id": 3,
-			"type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
-			"inputs": [
-				{
-					"name": "body",
-					"type": "string",
-					"value": "return { output: { myValue: input * 2 } }",
-					"link": null
-				},
-				{
-					"name": "input",
-					"type": "procedure",
-					"value": "output.myValue",
-					"link": null
-				},
-				{
-					"name": "pulse",
-					"type": "basepulse",
-					"link": null
-				}
-			],
-			"outputs": [
-				{
-					"name": "result",
-					"type": "basepulse",
-					"linkType": "pulse"
-				},
-				{
-					"name": "pulseOut",
-					"type": "basepulse",
-					"linkType": "pulse"
-				}
-			]
-		},
-		{
-			"id": 4,
-			"type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
-			"inputs": [
-				{
-					"name": "body",
-					"type": "string",
-					"value": "return { output: { myValue: input * 2 } }",
-					"link": null
-				},
-				{
-					"name": "input",
-					"value": "result.output.myValue",
-					"type": "pulse",
-					"link": null
-				},
-				{
-					"name": "pulse",
-					"type": "basepulse",
-					"link": null
-				}
-			],
-			"outputs": [
-				{
-					"name": "result",
-					"type": "eval",
-					"linkType": "eval"
-				},
-				{
-					"name": "pulseOut",
-					"type": "basepulse",
-					"linkType": "pulse"
-				}
-			]
-		}
-	],
-	"links": [
-		[1, 1, 0, 2, 1, -1],
-		[2, 2, 0, 3, 1, -1],
-		[3, 3, 1, 4, 1, -1]
-	]
+    "nodes": [
+        {
+            "id": 1,
+            "type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+            "inputs": [
+                {
+                    "name": "body",
+                    "type": "string",
+                    "value": "return { output: { myValue: 3 } }",
+                    "link": null
+                },
+                {
+                    "name": "input",
+                    "type": "string",
+                    "value": "",
+                    "link": null
+                },
+                {
+                    "name": "pulse",
+                    "type": "basepulse",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "eval",
+                    "linkType": "eval"
+                },
+                {
+                    "name": "pulseOut",
+                    "type": "basepulse",
+                    "linkType": "pulse"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+            "inputs": [
+                {
+                    "name": "body",
+                    "type": "string",
+                    "value": "return { output: { myValue: input * 6 } }",
+                    "link": null
+                },
+                {
+                    "name": "input",
+                    "type": "procedure",
+                    "value": "output.myValue",
+                    "link": null
+                },
+                {
+                    "name": "pulse",
+                    "type": "basepulse",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "eval",
+                    "linkType": "eval"
+                },
+                {
+                    "name": "pulseOut",
+                    "type": "basepulse",
+                    "linkType": "pulse"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+            "inputs": [
+                {
+                    "name": "body",
+                    "type": "string",
+                    "value": "return { output: { myValue: input * 2 } }",
+                    "link": null
+                },
+                {
+                    "name": "input",
+                    "type": "procedure",
+                    "value": "output.myValue",
+                    "link": null
+                },
+                {
+                    "name": "pulse",
+                    "type": "basepulse",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "basepulse",
+                    "linkType": "pulse"
+                },
+                {
+                    "name": "pulseOut",
+                    "type": "basepulse",
+                    "linkType": "pulse"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "type": "File:///Users/dushyant/Maya/newModules/stdlib/symbols/function/function.ts",
+            "inputs": [
+                {
+                    "name": "body",
+                    "type": "string",
+                    "value": "return { output: { myValue: input * 2 } }",
+                    "link": null
+                },
+                {
+                    "name": "input",
+                    "value": "result.output.myValue",
+                    "type": "pulse",
+                    "link": null
+                },
+                {
+                    "name": "pulse",
+                    "type": "basepulse",
+                    "link": null
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "result",
+                    "type": "eval",
+                    "linkType": "eval"
+                },
+                {
+                    "name": "pulseOut",
+                    "type": "basepulse",
+                    "linkType": "pulse"
+                }
+            ]
+        }
+    ],
+    "links": [
+        [1, 1, 0, 2, 1, -1],
+        [2, 2, 0, 3, 1, -1],
+        [3, 3, 1, 4, 1, -1]
+    ]
 }

@@ -1,69 +1,69 @@
 {
-	"symbols": [
-		{
-			"id": "f1",
-			"label": "f1",
-			"type": "mayalabs_stdlib@0.0.5/function",
-			"inputs": {
-				"body": {
-					"type": "string",
-					"value": "return { output: 1 };"
-				},
-				"input": {
-					"type": "string",
-					"value": "bruh"
-				}
-			},
-			"outputs": {},
-			"children": {
-				"in": [[]],
-				"out": [],
-				"symbols": []
-			}
-		},
-		{
-			"id": "f2",
-			"label": "f2",
-			"type": "mayalabs_stdlib@0.0.5/function",
-			"inputs": {
-				"body": {
-					"type": "string",
-					"value": "return { output: input * 2 }"
-				},
-				"input": {
-					"type": "symbol",
-					"symbolId": "f1",
-					"value": "output"
-				}
-			},
-			"outputs": {},
-			"children": {
-				"in": [[]],
-				"out": [],
-				"symbols": []
-			}
-		},
-		{
-			"id": "f3",
-			"label": "f3",
-			"type": "mayalabs_stdlib@0.0.5/function",
-			"inputs": {
-				"body": {
-					"type": "string",
-					"value": "return { output: input * 2 }"
-				},
-				"input": {
-					"type": "symbol",
-					"symbolId": "f2",
-					"value": "output"
-				}
-			},
-			"outputs": {},
-			"children": {
-				"in": [[]],
-				"out": [],
-				"symbols": []
-			}
-		}
-	]
+    "symbols": [
+        {
+            "id": "f1",
+            "label": "f1",
+            "type": "mayalabs_stdlib@0.0.5/function",
+            "inputs": {
+                "body": {
+                    "type": "string",
+                    "value": "return { output: 1 };"
+                },
+                "input": {
+                    "type": "string",
+                    "value": "bruh"
+                }
+            },
+            "outputs": {},
+            "children": {
+                "in": [[]],
+                "out": [],
+                "symbols": []
+            }
+        },
+        {
+            "id": "f2",
+            "label": "f2",
+            "type": "mayalabs_stdlib@0.0.5/function",
+            "inputs": {
+                "body": {
+                    "type": "string",
+                    "value": "return { output: input * 2 }"
+                },
+                "input": {
+                    "type": "symbol",
+                    "symbolId": "f1",
+                    "value": "output"
+                }
+            },
+            "outputs": {},
+            "children": {
+                "in": [[]],
+                "out": [],
+                "symbols": []
+            }
+        },
+        {
+            "id": "f3",
+            "label": "f3",
+            "type": "mayalabs_stdlib@0.0.5/function",
+            "inputs": {
+                "body": {
+                    "type": "string",
+                    "value": "return { output: input * 2 }"
+                },
+                "input": {
+                    "type": "symbol",
+                    "symbolId": "f2",
+                    "value": "output"
+                }
+            },
+            "outputs": {},
+            "children": {
+                "in": [[]],
+                "out": [],
+                "symbols": []
+            }
+        }
+    ]
 }

@@ -1,5 +1,5 @@
-import { Context } from "../runtime/runtime.d.ts"
-import { Runnable } from "./hybrid.ts"
+import { Context } from '../runtime/runtime.d.ts'
+import { Runnable } from './hybrid.ts'
 
 type PrimitiveType = 'pulse' | 'flow' | 'global' | 'boolean' | 'number' | 'string' | 'json'
 
