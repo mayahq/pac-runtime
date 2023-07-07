@@ -20,13 +20,18 @@ export class RemoteStorage implements Storage {
     }
 
     async get(workerId: string): Promise<LiteGraphSpec> {
-        const response = await this.runtime.axiosInstance({
-            url: `${this.baseUrl}/v2/worker/program/${workerId}`,
-            method: 'get',
-        })
-        const data = response.data
-        console.log('Got program', JSON.stringify(data, null, 4))
-        return data.program.dsl
+        try {
+            const response = await this.runtime.axiosInstance({
+                url: `${this.baseUrl}/v2/worker/program/${workerId}`,
+                method: 'get',
+            })
+            const data = response.data
+            console.log('Got program', JSON.stringify(data, null, 4))
+            return data.program.dsl
+        } catch (e) {
+            console.log('what the fuck?????', e.response.status, e.response.data)
+            throw e
+        }
     }
 
     async set(workerId: string, prog: LiteGraphSpec) {

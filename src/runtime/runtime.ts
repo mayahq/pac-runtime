@@ -14,6 +14,7 @@ import { LocalStorage } from '../storage/local.ts'
 import { Program } from '../../mod.ts'
 import { LiteGraphSpec } from '../program/hybrid.d.ts'
 import { InMemoryContext } from './context.ts'
+import { waitForRuntimeSSL } from './status.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
 //fp
@@ -188,6 +189,8 @@ export class Runtime implements RuntimeInterface {
         this.app.use(this.dynamicRouter.routes())
 
         console.log('Runtime', this.infoSummary)
+        waitForRuntimeSSL(this)
+        console.log('Listening on port', 9023)
         this.app.listen({ port: 9023 })
     }
 

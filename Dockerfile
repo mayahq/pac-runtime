@@ -17,4 +17,4 @@ EXPOSE 9023
 # someone from changing the code of the same version in a remote
 # dependency. It's unsafe to do this, but we're in FAFO phase right
 # now so it's ok.
-CMD deno task dev
+CMD deno task run
