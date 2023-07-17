@@ -5,3 +5,4 @@ scripts/*
 .vscode/*
 .github/*
 .env
+.fafo

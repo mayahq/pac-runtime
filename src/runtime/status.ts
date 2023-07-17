@@ -22,6 +22,7 @@ async function checkStatus() {
         await axios.get(runtimeUrl)
         return true
     } catch (e) {
+        console.log('here', e?.response?.status, e?.response?.data)
         return false
     }
 }

@@ -17,7 +17,9 @@ import { InMemoryContext } from './context.ts'
 import { waitForRuntimeSSL } from './status.ts'
 // import { stdpath } from '../../test_deps.ts'
 // import { LocalStorage } from '../storage/local.ts'
-//fp
+
+import '../utils/interceptor.ts'
+
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 type ParamsDictionary = {
     [key: string]: string
