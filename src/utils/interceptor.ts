@@ -1,6 +1,11 @@
 import { axios } from '../../deps.ts'
 
 export function registerInterceptors() {
+    axios.interceptors.request.use(config => {
+        console.log('A request is being made:', config.url, config.method, config.data)
+        return config
+    })
+
 	/**
 	 * Log all axios error responses, since axios errors objects are not logged
      * by Deno
@@ -9,8 +14,8 @@ export function registerInterceptors() {
 		(response) => response,
 		(error) => {
             if (error.response) {
-                console.log('Axios error response config:', error.response.config)
-                console.log('Axios error response data:', error.response.status, error.response.data)
+                // console.log('Axios error response config:', error.response.config)
+                console.log('Axios error response status:', error.response.status)
             }
 
             /**

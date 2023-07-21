@@ -1,10 +1,12 @@
-import { Router } from '../../deps.ts'
-import { Runtime } from '../runtime/runtime.ts'
-import { Program } from '../program/hybrid.ts'
+import { Router } from '../../../deps.ts'
+import { Runtime } from '../../runtime/runtime.ts'
+import { Program } from '../../program/hybrid.ts'
+import { authMiddleware } from '../middleware/auth.ts'
 
 function getProgramRouter(runtime: Runtime) {
     const router = new Router()
     router.prefix('/program')
+    router.use(authMiddleware)
 
     router.post('/deploy', async (ctx) => {
         const reqBody = await ctx.request.body().value

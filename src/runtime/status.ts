@@ -5,26 +5,34 @@ import { Runtime } from './runtime.ts'
 
 type PollFunction = (...args: any[]) => Promise<boolean>
 
-async function checkStatus() {
-    console.log('Checking SSL')
-    const username = getEnvVariableOrCrash('OWNER_USERNAME', 'dusnat')
-    const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'LOCAL')
-    const id = getEnvVariableOrCrash('RUNTIME_ID', 'abcxyz')
+function checkStatus(): Promise<boolean> {
+    return new Promise((resolve) => {
+        console.log('Checking SSL')
+        const username = getEnvVariableOrCrash('OWNER_USERNAME', 'dusnat')
+        const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'LOCAL')
+        const id = getEnvVariableOrCrash('RUNTIME_ID', 'abcxyz')
+        
+        if (environment === 'LOCAL') {
+            return true
+        }
     
-    if (environment === 'LOCAL') {
-        return true
-    }
-
-    const baseUrl = environment === 'STAGING' ? 'dev.mayalabs.io' : 'mayalabs.io'
-    const runtimeUrl = `https://rt-${id}.${username}.${baseUrl}/health`
-    
-    try {
-        await axios.get(runtimeUrl)
-        return true
-    } catch (e) {
-        console.log('here', e?.response?.status, e?.response?.data)
-        return false
-    }
+        const baseUrl = environment === 'STAGING' ? 'dev.mayalabs.io' : 'mayalabs.io'
+        const runtimeUrl = `https://rt-${id}.${username}.${baseUrl}/health?timestamp=${Date.now()}`
+        
+        axios.get(runtimeUrl)
+            .then(() => resolve(true))
+            .catch((e) => {
+                console.log('status:', e.response.status)
+                resolve(false)
+            })
+        // try {
+        //     await axios.get(runtimeUrl)
+        //     return true
+        // } catch (e) {
+        //     console.log('here', e?.response?.status)
+        //     return false
+        // }
+    })
 }
 
 const poll = (pollFn: PollFunction, interval = 1000, timeout = 60_000) => {
@@ -49,7 +57,9 @@ const poll = (pollFn: PollFunction, interval = 1000, timeout = 60_000) => {
 }
 
 export const waitForRuntimeSSL = async (runtime: Runtime) => {
+    console.log('wait for SSL called')
     await poll(checkStatus)
+    console.log('Runtime is available on public internet')
     const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'LOCAL')
 
     if (environment === 'LOCAL') {
