@@ -17,9 +17,7 @@ export function getEnvVariableOrCrash(varname: string, defaultVal?: string): str
 }
 
 export function loadEnv() {
-    console.log('bruh')
     const env = config()
-    console.log('env', env)
     Object.entries(env).forEach(([k, v]) => Deno.env.set(k, v))
 }
 

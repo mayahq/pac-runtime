@@ -363,7 +363,7 @@ export class Program {
         this.dsl = dsl
         expandProgramWithFunctions(this.dsl)
 
-        console.log('expanded dsl', JSON.stringify(this.dsl, null, 4))
+        // console.log('expanded dsl', JSON.stringify(this.dsl, null, 4))
 
         this.leafProcedures = {}
 
@@ -386,9 +386,9 @@ export class Program {
      * @returns Program instance that can be deployed and run.
      */
     static from(spec: LiteGraphSpec): Program {
-        console.log('The spec', spec)
+        // console.log('The spec', spec)
         const dsl = getProgramDsl(spec)
-        console.log('The dsl', dsl)
+        // console.log('The dsl', dsl)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
