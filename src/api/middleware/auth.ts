@@ -1,23 +1,25 @@
 import { Middleware } from '../../../deps.ts'
 import validate from "../../runtime/auth.ts";
+import { getEnvVariableOrCrash } from '../../utils/misc.ts';
 
-type AccessData = {
-    exp: number
-    permissions: string
-    slug: string
-    tier: 'PREMIUM' | 'FREE'
-    trialDays: number
-}
-
-type AuthServiceResponse = {
-    user: {
-        id: string
-        profileSlug: string
-        access: AccessData[]
-    }
-}
+const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'LOCAL')
 
 export const authMiddleware: Middleware = async (ctx, next) => {
+    if (environment === 'LOCAL') {
+        ctx.state.user = {
+            id: 'mayahq',
+            profileSlug: 'mayahq',
+            access: [{
+                exp: 919191,
+                permissions: 'ADMIN',
+                slug: 'mayahq',
+                tier: 'PREMIUM',
+                trialDays: 15
+            }]
+        }
+        return next()
+    }
+
     const authHeader = ctx.request.headers.get('Authorization')
     const apiKey = ctx.request.headers.get('x-api-key')
 

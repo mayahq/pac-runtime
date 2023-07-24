@@ -1,5 +1,6 @@
 import { Application, Router } from '../../deps.ts'
 import { getSmallRandomId } from '../utils/misc.ts'
+import validate, { ValidateResult, ValidateSuccessResult } from './auth.ts'
 import { CommsInterface, ConnMessage, EventListener } from './runtime.d.ts'
 
 type CommsInitArgs = {
@@ -34,7 +35,7 @@ export class Comms implements CommsInterface {
     }
 
     _registerPrimarySocketListener() {
-        this.socketRouter.get('/', (ctx) => {
+        this.socketRouter.get('/', async (ctx) => {
             if (!ctx.isUpgradable) {
                 ctx.response.status = 400
                 ctx.response.body = {
@@ -42,10 +43,32 @@ export class Comms implements CommsInterface {
                 }
             }
 
+            const params = ctx.request.url.searchParams
+            const token = params.get('token')
+            const key = params.get('apiKey')
+            if (!token && !key) {
+                ctx.response.status = 401
+                return
+            }
+
+            let authResult: ValidateResult
+            if (token) {
+                authResult = await validate({ token: token as string })
+            } else {
+                authResult = await validate({ key: key as string })
+            }
+
+            if (authResult.status !== 200) {
+                console.log('Invalid credentials, no websocket for you.')
+                ctx.response.status = authResult.status
+                return
+            }
+
+
             const connectionId = getSmallRandomId()
             const ws = ctx.upgrade()
             ws.onopen = () => {
-                console.log('Got new websocket connection.')
+                console.log('Got new websocket connection from user', (authResult as ValidateSuccessResult).data.user.id)
                 this.connections[connectionId] = ws
             }
 

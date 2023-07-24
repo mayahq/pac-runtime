@@ -30,7 +30,7 @@ type AuthServiceResponse = {
     }
 }
 
-type ValidateSuccessResult = {
+export type ValidateSuccessResult = {
     status: 200
     data: AuthServiceResponse
 }
@@ -42,7 +42,7 @@ type ValidateFailResult = {
     }
 }
 
-type ValidateResult = ValidateSuccessResult | ValidateFailResult
+export type ValidateResult = ValidateSuccessResult | ValidateFailResult
 
 export default async function validate({ key, token }: ValidateArgs): Promise<ValidateResult> {
     if (!key && !token) {

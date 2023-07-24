@@ -25,13 +25,6 @@ function checkStatus(): Promise<boolean> {
                 console.log('status:', e.response.status)
                 resolve(false)
             })
-        // try {
-        //     await axios.get(runtimeUrl)
-        //     return true
-        // } catch (e) {
-        //     console.log('here', e?.response?.status)
-        //     return false
-        // }
     })
 }
 
@@ -57,14 +50,14 @@ const poll = (pollFn: PollFunction, interval = 1000, timeout = 60_000) => {
 }
 
 export const waitForRuntimeSSL = async (runtime: Runtime) => {
-    console.log('wait for SSL called')
-    await poll(checkStatus)
-    console.log('Runtime is available on public internet')
     const environment = getEnvVariableOrCrash('RUNTIME_ENVIRONMENT', 'LOCAL')
-
     if (environment === 'LOCAL') {
         return
     }
+
+    await poll(checkStatus)
+    console.log('Runtime is available on public internet')
+
 
     await runtime.axiosInstance({
         url: `${runtime.appBackendBaseUrl}/v2/worker/update-status`,
