@@ -88,6 +88,22 @@ class Symbol implements SymbolImpl {
         }
     }
 
+    async _init(runner: Runnable, sender: RunnableCallback, runtime?: Runtime): Promise<void> {
+        this.init(runner, sender, runtime)
+            .catch(e => {
+                this.runtime.functions.sendMessage(
+                    'error',
+                    {
+                        message: (e as Error).message,
+                        name: (e as Error).name,
+                        sourceProcedure: runner.dsl.id,
+                        timestamp: Date.now(),
+                        place: 'init'
+                    }
+                )
+            })
+    }
+
     async init(_runner: Runnable, _sender: RunnableCallback, _runtime?: Runtime): Promise<void> {
         // Left for the symbol developer to override
     }
@@ -98,7 +114,7 @@ class Symbol implements SymbolImpl {
         _callback: RunnableCallback,
         _pulse?: Record<string, any>,
     ) {
-        this.runtime.functions.reportExecutionStatus('RUNNING')
+        this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'RUNNING')
         const schema = this.getSelfSchema()
         const vals: Record<string, any> = {}
         for (const propertyName in schema.inputSchema) {
@@ -108,12 +124,12 @@ class Symbol implements SymbolImpl {
         // Do not allow completely overwriting the pulse. Properties can only
         // be overwritten explicitly.
         const callback: RunnableCallback = (val: any, portName?: string) => {
-            this.runtime.functions.reportExecutionStatus('DONE')
+            this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'DONE')
             _callback({ ..._pulse, ...val }, portName)
         }
         this.call(_ctx, vals, callback, _pulse)
             .catch(e => {
-                console.log('got an error here')
+                this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'ERROR')
                 this.runtime.functions.sendMessage(
                     'error',
                     {

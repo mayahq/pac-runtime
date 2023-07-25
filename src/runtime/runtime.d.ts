@@ -9,10 +9,10 @@ export type ConnMessage = {
 export type EventListener = (msg: ConnMessage) => Promise<void>
 
 export type SymbolStatus = 'FAILED' | 'PROGRESS' | 'SUCCESS'
-export type ExecutionStatus = 'RUNNING' | 'DONE'
+export type ExecutionStatus = 'RUNNING' | 'DONE' | 'ERROR'
 
 export interface SymbolMethods {
-    reportExecutionStatus: (status: ExecutionStatus) => Promise<void>
+    reportExecutionStatus: (procId: string, status: ExecutionStatus) => Promise<void>
     sendMessage: (event: string, data: unknown) => Promise<void>
     setStatus: (status: SymbolStatus, message: string) => Promise<void>
 }

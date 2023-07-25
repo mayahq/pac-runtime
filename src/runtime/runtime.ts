@@ -50,10 +50,10 @@ type DynamicRoute = {
 }
 
 function getSymbolMethods(runtime: Runtime): SymbolMethods {
-    const reportExecutionStatus = (status: ExecutionStatus) => {
+    const reportExecutionStatus = (procId: string, status: ExecutionStatus) => {
         return runtime.comms.broadcast({
             event: 'nodeexecstatus',
-            data: { status },
+            data: { status, sourceProcedure: procId },
         })
     }
 
