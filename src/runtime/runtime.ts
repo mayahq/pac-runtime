@@ -49,6 +49,15 @@ type DynamicRoute = {
     matchFunction: (path: string) => any
 }
 
+type RecordProcIoArgs = {
+    nodeType: string
+    inputs: unknown
+    output: {
+        portName: string
+        data: unknown
+    }
+}
+
 function getSymbolMethods(runtime: Runtime): SymbolMethods {
     const reportExecutionStatus = (procId: string, status: ExecutionStatus) => {
         return runtime.comms.broadcast({
@@ -216,5 +225,17 @@ export class Runtime implements RuntimeInterface {
             data: { patch },
         })
         this.program = program
+    }
+
+    async recordProcedureIo(ioData: RecordProcIoArgs) {
+        if (this.environment === 'LOCAL') {
+            return
+        }
+
+        await this.axiosInstance({
+            url: `${this.appBackendBaseUrl}/v2/worker/logio`,
+            method: 'post',
+            data: ioData
+        })
     }
 }

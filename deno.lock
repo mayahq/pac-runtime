@@ -170,7 +170,6 @@
     "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/deps.ts": "d6661d2fb018b64fdfffd4bb08ee291908b51ae93a00dfe419024645ada84f06",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/debug/debug.ts": "741752916ba22262ec335d46e4f254a407b1db8ef1ea5a9d5ae6475390ed1d36",
-    "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/function/function.ts": "8b8a858010c2261d9af2815ae9a07d2d9bcbbf7dd9ed0c9ebba64c6e1768077c",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/http_request/http_request.ts": "8d1ba2edfb945be7dcf907d628581af13e470a7a4df8ccd56a0d223d92d77e2b",
     "https://raw.githubusercontent.com/mayahq/stdlib/main/symbols/inject/inject.ts": "facb25f352fae1741f744779dd6d035f24c9a8568bbcdd94a0c43b982ed3a4a6"
   },

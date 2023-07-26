@@ -124,6 +124,14 @@ class Symbol implements SymbolImpl {
         // Do not allow completely overwriting the pulse. Properties can only
         // be overwritten explicitly.
         const callback: RunnableCallback = (val: any, portName?: string) => {
+            this.runtime.recordProcedureIo({
+                nodeType: _runner.dsl.type,
+                inputs: vals,
+                output: {
+                    data: val,
+                    portName: portName || ''
+                }
+            })
             this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'DONE')
             _callback({ ..._pulse, ...val }, portName)
         }
