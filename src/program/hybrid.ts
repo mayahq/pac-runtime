@@ -270,8 +270,32 @@ export class Runnable {
             ctx = ctx.clone()
         }
 
-        if (pulse) {
-            try {
+        /**
+         * Execute the symbol if its a leaf symbol
+         */
+        if (this.baseProgram.leafProcedures[this.dsl.id]) {
+            const val = await new Promise((resolve) => {
+                let callback: RunnableCallback = (val, _) => {
+                    this.baseProgram.hooks['onProcedureDone'].forEach((fn) => fn(val, this.dsl.id))
+                    resolve(val)
+                }
+                if (pulse) {
+                    resolve(1) // Don't need to wait for the procedure if this is pulse-based
+                    callback = (val, port) => {
+                        this.sender(val, port, ctx)
+                    }
+                }
+
+                this.baseProgram.leafProcedures[this.dsl.id].instance._call(
+                    this,
+                    ctx as unknown as Context, // smh
+                    callback,
+                    pulse,
+                )
+            })
+            return val
+        } else {
+            if (pulse) {
                 if (this.dsl.type === 'subflow' || this.dsl.type === 'function_instance') {
                     // Subflows are different
                     const nextProcIds = this.dsl.children?.pulseIn
@@ -285,59 +309,30 @@ export class Runnable {
 
                     return
                 }
-            } catch (e) {
-                console.log('dsl hehe', JSON.stringify(this.parent!.dsl, null, 4))
-                throw e
-            }
-
-            /**
-             * Execute the symbol if its a leaf symbol
-             */
-            if (this.baseProgram.leafProcedures[this.dsl.id]) {
-                const val = await new Promise((resolve) => {
-                    let callback: RunnableCallback = (val, _) => {
-                        this.baseProgram.hooks['onProcedureDone'].forEach((fn) => fn(val, this.dsl.id))
-                        resolve(val)
-                    }
-                    if (pulse) {
-                        resolve(1) // Don't need to wait for the procedure if this is pulse-based
-                        callback = (val, port) => {
-                            this.sender(val, port, ctx)
-                        }
-                    }
-
-                    this.baseProgram.leafProcedures[this.dsl.id].instance._call(
-                        this,
-                        ctx as unknown as Context, // smh
-                        callback,
-                        pulse,
-                    )
+            } else {
+                /**
+                 * We've run into my biggest enemy - a lambda. Find out which children
+                 * nodes contribute to the output of this lambda.
+                 */
+                const outputChildren: ProcedureDsl[] = []
+                Object.values(this.dsl.children!.outputs).forEach((out) => {
+                    const child = this.dsl.children!.procedures[out.procedureId]
+                    outputChildren.push(child)
                 })
-                return val
+        
+                /**
+                 * And then run them.
+                 */
+                return await Promise.all(outputChildren.map((symbol) => {
+                    const runnable = new Runnable({
+                        dsl: symbol,
+                        parent: this,
+                        baseProgram: this.baseProgram,
+                    })
+                    return runnable.run(ctx)
+                }))
             }
         }
-
-        /**
-         * We've run into my biggest enemy - a lambda. Find out which children
-         * nodes contribute to the output of this lambda.
-         */
-        const outputChildren: ProcedureDsl[] = []
-        Object.values(this.dsl.children!.outputs).forEach((out) => {
-            const child = this.dsl.children!.procedures[out.procedureId]
-            outputChildren.push(child)
-        })
-
-        /**
-         * And then run them.
-         */
-        return await Promise.all(outputChildren.map((symbol) => {
-            const runnable = new Runnable({
-                dsl: symbol,
-                parent: this,
-                baseProgram: this.baseProgram,
-            })
-            return runnable.run(ctx)
-        }))
     }
 }
 
@@ -355,6 +350,7 @@ export class Program {
     parentMap: Record<string, string>
     liteGraphDsl?: LiteGraphSpec
     hooks: Record<ProgramEvent, ProgramHook[]>
+    cacheSessionId?: string
 
     hub: EventTarget
     listener: EventListener
@@ -386,9 +382,7 @@ export class Program {
      * @returns Program instance that can be deployed and run.
      */
     static from(spec: LiteGraphSpec): Program {
-        // console.log('The spec', spec)
         const dsl = getProgramDsl(spec)
-        // console.log('The dsl', dsl)
         const program = new Program({ dsl })
         program.liteGraphDsl = spec
         return program
@@ -413,6 +407,7 @@ export class Program {
         firstProcedureId?: string,
         lastProcedureId?: string,
         timeout?: number,
+        cacheSessionId?: string
     ): Promise<any> {
         if (!firstProcedureId || !lastProcedureId) {
             const [guessedFirstProcId, guessedLastProcId] = guessEdgeProcIds(spec)
@@ -448,7 +443,7 @@ export class Program {
             }
 
             program.addHook('onProcedureDone', handler)
-            program.deploy(runtime)
+            program.deploy(runtime, cacheSessionId)
                 .then(() => {
                     if (timeout) {
                         errorTimeout = setTimeout(() => {
@@ -615,9 +610,10 @@ export class Program {
      *
      * @param runtime Runtime instance
      */
-    async deploy(runtime?: Runtime) {
+    async deploy(runtime?: Runtime, cacheSessionId?: string) {
         await this.getLeafProcedures(this.dsl.procedures, runtime)
         await this.init(runtime)
+        this.cacheSessionId = cacheSessionId
 
         const listener: EventListener = async (e: Event) => {
             const event = e as CustomEvent
@@ -625,7 +621,7 @@ export class Program {
             const { pulse, destination, context, metadata } = data
 
             // const destinationProcedure = this.leafProcedures[destination]
-            console.log('SENDING MESSAGE TO', destination)
+            // console.log('SENDING MESSAGE TO', destination)
             const destinationProcedureDsl = this.allProcedures[destination]
             const runnable = new Runnable({
                 dsl: destinationProcedureDsl,

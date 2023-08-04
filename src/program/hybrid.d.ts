@@ -89,12 +89,13 @@ export type LiteGraphNodeOutput = {
     links?: string | null | number[]
     value?: string | number | boolean | JSON
     linkType?: string
+    linkTo?: string
 }
 
 export type LiteGraphNodeInput = {
     name: string
     type: string | number
-    link: string | null | number
+    link?: string | null | number
     value?: string | number | boolean | JSON
     label?: string
     linkType?: string
@@ -102,18 +103,20 @@ export type LiteGraphNodeInput = {
 }
 
 export interface LiteGraphNode {
-    id: number
+    // Stuff you need for execution
+    id: number | string
     type: string
-    pos?: number[]
-    size?: Record<string, number> | number[]
-    flags?: any
-    mode?: number
+    subgraph?: LiteGraphSpec
+    function?: string
     outputs?: LiteGraphNodeOutput[]
     inputs?: LiteGraphNodeInput[]
-    properties?: Record<string, any>
-    subgraph?: LiteGraphSpec
+    
+    // Stuff you need for the frontend
+    parentId?: string
+    pos?: number[]
     boxcolor?: string
-    function?: string
+    paletteLabel?: string
+    name?: string
 }
 
 /**

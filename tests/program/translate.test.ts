@@ -2,8 +2,7 @@ import {
     createLeafInputMap,
     createOutInMap,
     createParentMap,
-    getFirstProcId,
-    getLastProcId,
+    guessEdgeProcIds,
     getLeafInputs,
     getProgramDsl,
     TranslateError,
@@ -80,29 +79,26 @@ Deno.test('LiteGraph to execution DSL conversion', async (t) => {
 Deno.test('Edge procedure detection for program eval', async (t) => {
     await t.step('Finding starting procedure', async (t) => {
         await t.step('Returns correct procedure ID when possible', () => {
-            const id = getFirstProcId(liteGraphWorkingExample)
-            assertEquals(id, '1')
+            const [id] = guessEdgeProcIds(liteGraphWorkingExample)
+            assertEquals(id, '3')
         })
 
-        await t.step('Errors out when determining first procedure is impossible', () => {
-            assertThrows(
-                () => getFirstProcId(liteGraphCyclic),
-                TranslateError,
-            )
+
+        await t.step('Returns null when determining first procedure is impossible', () => {
+            const [startId] = guessEdgeProcIds(liteGraphCyclic)
+            assertEquals(startId, null)
         })
     })
 
     await t.step('Finding the ending procedure', async (t) => {
         await t.step('Returns correct procedure ID when possible', () => {
-            const id = getLastProcId(liteGraphWorkingExample)
+            const [_, id] = guessEdgeProcIds(liteGraphWorkingExample)
             assertEquals(id, '4')
         })
 
-        await t.step('Errors out when determining last procedure is impossible', () => {
-            assertThrows(
-                () => getLastProcId(liteGraphCyclic),
-                TranslateError,
-            )
+        await t.step('Returns null when determining last procedure is impossible', () => {
+            const [_, endId] = guessEdgeProcIds(liteGraphCyclic)
+            assertEquals(endId, null)
         })
     })
 })
