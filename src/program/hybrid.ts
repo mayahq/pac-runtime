@@ -398,6 +398,7 @@ export class Program {
      * @param firstProcedureId The starting node ID. Will be auto-determined (best effort) if not provided.
      * @param lastProcedureId The terminating node ID. Will be auto-determined (best effort) if not proviced.
      * @param timeout The timeout for evaluation, starting *after* the program has deployed completely.
+     * @param cacheSessionId ID of the procedure-execution cache store to be used while running procedures
      * @returns
      */
     static eval(
@@ -620,8 +621,6 @@ export class Program {
             const data: PulseEventDetail = event.detail
             const { pulse, destination, context, metadata } = data
 
-            // const destinationProcedure = this.leafProcedures[destination]
-            // console.log('SENDING MESSAGE TO', destination)
             const destinationProcedureDsl = this.allProcedures[destination]
             const runnable = new Runnable({
                 dsl: destinationProcedureDsl,

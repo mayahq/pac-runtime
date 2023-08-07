@@ -123,7 +123,7 @@ class Symbol implements SymbolImpl {
             vals[propertyName] = await _runner.evaluateProperty(propertyName, _pulse)
         }
 
-        const cacheSessionId = _runner.baseProgram.cacheSessionId || 'basecache'
+        const cacheSessionId = _runner.baseProgram.cacheSessionId
         if (cacheSessionId) {
             console.log('looking in cache')
             const result = this.runtime.executionCache.get(
