@@ -114,11 +114,31 @@ class Symbol implements SymbolImpl {
         _callback: RunnableCallback,
         _pulse?: Record<string, any>,
     ) {
+        console.log(`\nrunning _call: [${_runner.dsl.type}]`)
+        // console.log(`[${_runner.dsl.type}]`)
         this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'RUNNING')
         const schema = this.getSelfSchema()
         const vals: Record<string, any> = {}
         for (const propertyName in schema.inputSchema) {
             vals[propertyName] = await _runner.evaluateProperty(propertyName, _pulse)
+        }
+
+        const cacheSessionId = _runner.baseProgram.cacheSessionId || 'basecache'
+        if (cacheSessionId) {
+            console.log('looking in cache')
+            const result = this.runtime.executionCache.get(
+                cacheSessionId,
+                _runner.dsl.type,
+                vals
+            )
+
+            if (result !== undefined) {
+                console.log('Cache hit, skipping node execution')
+                this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'DONE')
+                return _callback({ ..._pulse, ...result.result }, result.portName)
+            }
+
+            console.log('Cache miss, executing node')
         }
 
         // Do not allow completely overwriting the pulse. Properties can only
@@ -133,6 +153,19 @@ class Symbol implements SymbolImpl {
                 }
             })
             this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'DONE')
+            if (cacheSessionId) {
+                const valueToCache = _pulse !== undefined && _pulse !== null ? { ..._pulse, ...val } : val
+                console.log('Saving node result to cache')
+                this.runtime.executionCache.set(
+                    cacheSessionId,
+                    _runner.dsl.type,
+                    vals,
+                    {
+                        portName: portName || '',
+                        result: valueToCache
+                    }
+                )
+            }
             _callback({ ..._pulse, ...val }, portName)
         }
         this.call(_ctx, vals, callback, _pulse)

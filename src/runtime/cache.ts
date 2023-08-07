@@ -43,6 +43,9 @@ export class ExecutionCacheSession {
         const sortedEntries = Object.entries(valueMap).sort((a, b) => a[0] < b[0] ? -1 : 1)
         return sortedEntries.map(entry => {
             if (primitives[typeof entry[1]]) {
+                if (entry[1] === undefined) {
+                    return 'undefined'
+                }
                 return entry[1].toString()
             } else if (entry[1] === null) {
                 return 'null'
