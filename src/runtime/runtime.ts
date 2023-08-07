@@ -19,6 +19,7 @@ import { waitForRuntimeSSL } from './status.ts'
 // import { LocalStorage } from '../storage/local.ts'
 
 import '../utils/interceptor.ts'
+import { ExecutionCache } from './cache.ts'
 
 export type AutoShutdownBehaviour = 'NEVER' | 'BY_LAST_USE'
 type ParamsDictionary = {
@@ -101,6 +102,7 @@ export class Runtime implements RuntimeInterface {
     app: Application
     dynamicRouter: Router
     comms: Comms
+    executionCache: ExecutionCache
     functions: SymbolMethods
     storage: Storage
     program: Program | null
@@ -120,6 +122,7 @@ export class Runtime implements RuntimeInterface {
         this.dynamicRouter = new Router()
         this.dynamicRouter.prefix('/dynamic')
         this.comms = new Comms({ app: this.app })
+        this.executionCache = new ExecutionCache()
         this.functions = getSymbolMethods(this)
 
         const __dirname = new URL(import.meta.url).pathname
