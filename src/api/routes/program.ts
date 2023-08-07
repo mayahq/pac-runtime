@@ -24,9 +24,9 @@ function getProgramRouter(runtime: Runtime) {
 
     router.post('/eval', async (ctx) => {
         const reqBody = await ctx.request.body().value
-        const { program, data, firstProcedureId, lastProcedureId, timeout, sessionId } = reqBody
+        const { program, data, firstProcedureId, lastProcedureId, timeout, cacheSessionId } = reqBody
         try {
-            const result = await Program.eval(program, data, runtime, firstProcedureId, lastProcedureId, timeout, sessionId)
+            const result = await Program.eval(program, data, runtime, firstProcedureId, lastProcedureId, timeout, cacheSessionId)
             ctx.response.status = 200
             ctx.response.body = result
         } catch (e) {
