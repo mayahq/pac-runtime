@@ -114,7 +114,7 @@ class Symbol implements SymbolImpl {
         _callback: RunnableCallback,
         _pulse?: Record<string, any>,
     ) {
-        console.log(`\nrunning _call: [${_runner.dsl.type}]`)
+        // console.log(`\nrunning _call: [${_runner.dsl.type}]`)
         // console.log(`[${_runner.dsl.type}]`)
         this.runtime.functions.reportExecutionStatus(_runner.dsl.id, 'RUNNING')
         const schema = this.getSelfSchema()

@@ -2,6 +2,7 @@ import { Router } from '../../../deps.ts'
 import { Runtime } from '../../runtime/runtime.ts'
 import { Program } from '../../program/hybrid.ts'
 import { authMiddleware } from '../middleware/auth.ts'
+import { validateFlow } from '../../program/validate.ts'
 
 function getProgramRouter(runtime: Runtime) {
     const router = new Router()
@@ -11,6 +12,19 @@ function getProgramRouter(runtime: Runtime) {
     router.post('/deploy', async (ctx) => {
         const reqBody = await ctx.request.body().value
         const program = reqBody.program
+        const skipValidation = reqBody.skipValidation
+
+        if (!skipValidation) {
+            const problems = validateFlow(program)
+
+            const problemsExist = Object.keys(problems).some(key => problems[key].length > 0)
+            if (problemsExist) {
+                ctx.response.status = 400
+                ctx.response.body = { problems }
+            }
+            return
+        }
+
         await runtime.deploy({ liteGraphDsl: program })
 
         ctx.response.status = 200
@@ -32,6 +46,21 @@ function getProgramRouter(runtime: Runtime) {
         } catch (e) {
             ctx.response.status = 500
             ctx.response.body = e
+        }
+    })
+
+    router.post('/validate', async (ctx) => {
+        const reqBody = await ctx.request.body().value
+        const { program } = reqBody
+
+        const problems = validateFlow(program)
+
+        const problemsExist = Object.keys(problems).some(key => problems[key].length > 0)
+        if (problemsExist) {
+            ctx.response.status = 400
+            ctx.response.body = { problems }
+        } else {
+            ctx.response.status = 200
         }
     })
 
